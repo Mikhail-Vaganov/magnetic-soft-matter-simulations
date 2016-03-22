@@ -57,7 +57,7 @@ for s=1:1:length(t)
         for j=1:1:length(beta)
             if(alpha(i)>=beta(j))
                 hysts(i,j)=ApplyField(hysts(i,j),h(s));
-                m(s)=m(s)+u(j,i)*hysts(i,j).Value;
+                m(s)=m(s)+u(j,i)*hysts(i,j).Magnetization;
             end;
         end;
     end;

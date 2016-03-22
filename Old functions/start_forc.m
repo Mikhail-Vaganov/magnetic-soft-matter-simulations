@@ -1,7 +1,7 @@
 clc;
 close all;
 
-h= hysteron(1,3, -5);
+h= Hysteron(1,3, -5);
 
 ha = (h.Beta - (h.Alpha-h.Beta)/2 ):0.1:(h.Alpha - (h.Alpha-h.Beta)/2);
 hb = (h.Beta - (h.Alpha-h.Beta)/2 ):0.1:(h.Alpha + (h.Alpha-h.Beta)/2);
@@ -15,7 +15,7 @@ for i=1:1:length(ha);
         if(hb(j)>=ha(i))
             h= ApplyField(h,hb(j));
         end;
-        M(j,i)=h.Value;
+        M(j,i)=h.Magnetization;
     end;
 end;
 
@@ -29,7 +29,7 @@ xlabel('Ha');
 ylabel('Hb');
 %----------------------------------
 figure(2);
-h.Draw;
+h.Draw('/Results');
 %----------------------------------
 [Hc, Hu, P] = forc(Ha,Hb,M);
 figure(3);

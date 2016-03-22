@@ -1,3 +1,6 @@
+% This script creates meshgrid with distribution of probablity for hysteron
+% limits a and b
+
 clc;
 clear all;
 close all;
