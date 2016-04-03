@@ -44,8 +44,32 @@ classdef SWandP  < iMagneticParticle
         end;
         
         function r = ApplyField(p,field)
-            P_m = p.ParamagnetM(field);
-            p.SWparticle = p.SWparticle.ApplyField(field + p.Gamma2*P_m);
+            fun = @magnetic_fields;
+            H0 = [0,0];
+            global Hext
+            global g1
+            global g2
+            global psi
+            global value;
+            
+            global Msat_hi
+            global beta_hi
+            
+            Hext=field;
+            g1 = p.Gamma1;
+            g2 = p.Gamma2;
+            psi = p.SWparticle.AngleFA;
+            value = p.SWparticle.Magnetization;
+            
+            Msat_hi=1;
+            beta_hi=0.5;
+
+
+            H = fsolve(fun,H0);
+
+
+            P_m = p.ParamagnetM(H(2));
+            p.SWparticle = p.SWparticle.ApplyField(H(1));
             p.Magnetization = p.SWparticle.Magnetization + P_m;
             r = p;
         end;

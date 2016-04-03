@@ -1,3 +1,4 @@
 ## Ignore files containing simulation results
 /Results
 *.asv
+output*
