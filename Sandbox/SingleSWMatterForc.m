@@ -1,11 +1,11 @@
 clc;
 close all;
 
-sw = SWparticle(pi/2,1);
+sw = SWparticle(0,1);
 
 
 for i=1:1:length(sw)
     SHMatter = SingleParticleMatter(sw(i));
-    SHForc = FORC(SHMatter);
+    SHForc = FORC_2(SHMatter);
     SHForc.MagnetizationFORC();
 end;

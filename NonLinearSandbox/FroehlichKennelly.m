@@ -5,7 +5,7 @@ function [ M ] = FroehlichKennelly( H )
 global Msat_hi
 global beta_hi
 
-M = Msat_hi*H/(H+1/beta_hi);
+M = Msat_hi*H/(abs(H)+1/beta_hi);
 
 end
 

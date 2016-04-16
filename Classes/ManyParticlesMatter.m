@@ -1,4 +1,4 @@
-classdef ManySWParticlesMatter  <iMatter
+classdef ManyParticlesMatter  <iMatter
     %MANYSWPARTICLESMATTER Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -8,13 +8,12 @@ classdef ManySWParticlesMatter  <iMatter
     
     methods
         
-         function obj = ManySWParticlesMatter(particles)
+         function obj = ManyParticlesMatter(particles)
             if(nargin<1)
-                error('Need Particleû for initialization!');
+                error('Need Particles for initialization!');
             end;
             
             obj.Particles=particles;
-            C = 0;
             obj.NegativeSaturationField=1;
             obj.PositiveSaturationField=-1;
             
@@ -35,9 +34,9 @@ classdef ManySWParticlesMatter  <iMatter
             Matter.Magnetization = 0;
             for i=1:1:length(matter.Particles)
                  Matter.Particles(i)=Matter.Particles(i).ApplyField(field);
-                 Matter.Magnetization =Matter.Magnetization+ Matter.Particles(i).Magnetization;
+                 Matter.Magnetization =1.0*Matter.Magnetization+ 1.0*Matter.Particles(i).Magnetization;
             end;
-            Matter.Magnetization = Matter.Magnetization/length(Matter.Particles);
+            Matter.Magnetization = Matter.Magnetization/(1.0*length(Matter.Particles));
         end;
         
         function  Matter =  SaturateToPositive(matter)
@@ -61,28 +60,43 @@ classdef ManySWParticlesMatter  <iMatter
         end;
         
         function DrawMatterRepresentation(matter, folder)
-            t=0:0.1:2*pi;
-            h= -10*cos(t);
-
-            figure(111);
-            plot(t,h,'r');
-            grid on;
-            title('External field');
-            xlabel('time, t');
-            ylabel('field, h(t)');
+            t=0:0.01:2*pi;
+            magnitude = max(abs(matter.NegativeSaturationField), abs(matter.PositiveSaturationField));
+            h= magnitude*cos(t);
             
             m=zeros(length(t),1);
-            for s=1:1:length(t)
-                matter=matter.Magnetize(h(s));
-                m(s)=matter.Magnetization;
+            for i=1:1:length(t)
+                matter=matter.Magnetize(h(i));
+                m(i)=matter.Magnetization;
             end;
             
-            figure(222);
-            plot(h,m,'b');
+            fig=figure(999);
+            plot(h,m,'b.');
             grid on;
-            title('m(h)');
+            title(['M-H of multiparticle matter (n=' num2str(length(matter.Particles)) ')']);
             xlabel('h(t)');
             ylabel('m(h)');
+            
+            matter.DrawAxes(h,m,fig);
+            
+            mkdir(folder);
+            file_name = ['Multi_SW+Soft(' num2str(length(matter.Particles)) ')____H-M____' datestr(now,'HH_MM_SS.jpg')];
+            print('-djpeg',[folder file_name]);
+        end;
+        
+        function DrawAxes(matter, input, output, fig)
+            max_magn = max(output);
+            zero_yy= -max_magn:0.01:max_magn;
+            zero_yx = zeros(length(zero_yy),1);
+            
+            max_field=max(input);
+            zero_xx= -max_field:0.01:max_field;
+            zero_xy = zeros(length(zero_xx),1);
+            
+            figure(fig);
+            hold on;
+            plot(zero_yx,zero_yy, 'k',zero_xx,zero_xy, 'k');
+            hold off;
         end;
         
     end

@@ -66,6 +66,7 @@ classdef SWparticle < iMagneticParticle
                 output(i) = swp.Magnetization;
             end;
             
+            figure(88);
             plot(input,output,'b.');
             title(['Hyseresis of Stoner-Wohlfarth particle. alpha=', num2str(swp.AngleFA)]);
             
