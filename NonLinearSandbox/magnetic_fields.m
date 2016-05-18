@@ -10,6 +10,7 @@ global g2;
 global psi;
 global value;
 
+
 sw = SWparticle(psi,value);
 sw = sw.ApplyField(H(1));
 F(1) = Hext-H(1)+g1*FroehlichKennelly(H(2));

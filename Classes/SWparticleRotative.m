@@ -1,4 +1,4 @@
-classdef SWparticle < iMagneticParticle
+classdef SWparticleRotative < iMagneticParticle
     %The SWparticle represents a particle, which magnetization process is
     %described by means of Stoner-Wohlfarth model
     
@@ -8,10 +8,22 @@ classdef SWparticle < iMagneticParticle
         %Switching field
         SwField;
         LastAppliedField;
+        Elastic;
+        
         %SI
+        %asume for FeNdB
         Ku = 450000; % J/m3
+        k=1/2000000; %Pa
         mu0 = 1.2566e-6; %Tm/A
         Ms = 1.2733e+06;% A/m
+        
+        % permendur, Fe65Co35
+        % Ms = 1950000;% A/m
+        
+        % FeNdB
+        % Ku=
+        % Ms= 1.2733e+06 A/m
+        % Coercivity: 905000 A/m
     end
     
     methods
@@ -20,7 +32,7 @@ classdef SWparticle < iMagneticParticle
         %radians
         %fi - the angle between the external field and the magnetic moment
         %of the particle
-        function sw = SWparticle(psi, value)
+        function sw = SWparticleRotative(psi, value)
             sw.AngleFA = psi;
             sw.Magnetization = value;
             sw.LastAppliedField=0;
@@ -64,7 +76,7 @@ classdef SWparticle < iMagneticParticle
         end;
         
         function c=CosSearch(swp,value, angle)
-            energy = @(fi) 0.5*sin(swp.AngleFA-fi)^2-value*cos(fi);
+            energy = @(fi) 0.5*sin(swp.AngleFA-fi-value*sin(fi)*2*swp.Ku*swp.k)^2-value*cos(fi)+swp.k*swp.Ku*(value*sin(fi))^2;
             c=cos(fminsearch(energy,angle,optimset('TolFun', 1e-8,'TolX',1e-8,'MaxIter',1000,'MaxFunEvals',1000)));
         end;
         
@@ -90,7 +102,7 @@ classdef SWparticle < iMagneticParticle
                 output(i) = swp.Magnetization;
             end;
             
-            figure(88);
+            figure(99);
             plot(input,output,'b.');
             title(['Hyseresis of Stoner-Wohlfarth particle. alpha=' num2str(swp.AngleFA) 'SwField=' num2str(swp.SwField)]);
             
@@ -104,7 +116,7 @@ classdef SWparticle < iMagneticParticle
             print('-djpeg',[folder filesep file_name '.jpg']);
         end;
         
-        function DrawInFig(swp,folder, figHandler, options)
+        function DrawInFig(swp,folder,figHandler,options)
             t=0:0.01:2*pi;
             
             magnitude=swp.PositiveSaturationField;
@@ -116,14 +128,13 @@ classdef SWparticle < iMagneticParticle
                 swp = swp.ApplyField(input(i));
                 output(i) = swp.Magnetization;
             end;
-            
             input=input*2*swp.Ku/swp.mu0/swp.Ms;
             output = output*swp.Ms;
             switchingField = round(swp.SwField*2*swp.Ku/swp.mu0/swp.Ms,2);
-           
+            
             figure(figHandler);
             plot(input,output,options);
-            title(['Hyseresis of Stoner-Wohlfarth particle. alpha=' num2str(swp.AngleFA/pi*180) char(176) ' SwField=' num2str(switchingField)]);
+            title(['Hyseresis of Stoner-Wohlfarth particle. alpha=' num2str(swp.AngleFA/pi*180) char(176) ' SwField=' num2str(switchingField) ' A/m'] );
             xlabel('H, A/m');
             ylabel('M, A/m');
             

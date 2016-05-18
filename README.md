@@ -9,4 +9,5 @@ If you decide to use parts of my code in your research, please, let me know via 
 
 ##References
 1. Pike, Roberts, Verosub, JAP 1999
-2. Winklhofer, Zimanyi JAP 2006 
+2. Winklhofer, Zimanyi JAP 2006
+3. Harrison, Feinberg GGGE 2008 

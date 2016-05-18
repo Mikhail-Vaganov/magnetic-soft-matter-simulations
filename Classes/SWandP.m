@@ -12,13 +12,13 @@ classdef SWandP  < iMagneticParticle
     
     properties
         SWparticle;
-        Gamma1=0;
-        Gamma2=0;
+        Gamma1=0.1;
+        Gamma2=1;
         SaturationField=2;
         HonHi;
         HonSw;
         Beta_hi=0.01;
-        Msat_hi=10;
+        Msat_hi=1720000; % A/m for Fe
     end
     
     methods
@@ -43,8 +43,11 @@ classdef SWandP  < iMagneticParticle
         function m = ParamagnetM(p, field)
             global Msat_hi;
             global beta_hi;
+            global sw;
             Msat_hi=p.Msat_hi;
             beta_hi=p.Beta_hi;
+            sw=p.SWparticle;
+            
             m=FroehlichKennelly(field);
         end;
         
@@ -57,8 +60,8 @@ classdef SWandP  < iMagneticParticle
             global psi
             global value;
             
-            global Msat_hi
-            global beta_hi
+            global Msat_hi;
+            global beta_hi;
             
             Hext=field;
             g1 = p.Gamma1;
@@ -79,8 +82,8 @@ classdef SWandP  < iMagneticParticle
             p.HonSw=H(1);
             p.HonHi=H(2);
             P_m = p.ParamagnetM(H(2));
-            p.SWparticle = p.SWparticle.ApplyField(H(1));
-            p.Magnetization = p.SWparticle.Magnetization + P_m;
+            p.SWparticle =p.SWparticle.ApplyField(H(1));
+            p.Magnetization =p.SWparticle.Magnetization + P_m;
             r = p;
         end;
         
@@ -92,7 +95,7 @@ classdef SWandP  < iMagneticParticle
             h = - p.SaturationField;
         end;
         
-        function Draw(p,folder)
+        function Draw(p,folder, fig, options)
             t=0:0.01:2*pi;
             magnitude=p.PositiveSaturationField;
             input = magnitude*cos(t);
@@ -123,11 +126,11 @@ classdef SWandP  < iMagneticParticle
             zero_pfy= -max_part_field:0.01:max_part_field;
             zero_pfx = zeros(length(zero_pfy),1);
             
-            figure(55);
-            plot(input,output,'b.',zero_yx,zero_yy,'k',zero_xx,zero_xy, 'k' );
+            figure(fig);
+            plot(input,output,options,zero_yx,zero_yy,'k',zero_xx,zero_xy, 'k' );
             xlabel('H');
             ylabel('m');
-            title(['Magnetization of SW+Soft particle. SW-psi=', num2str(p.SWparticle.AngleFA)]);
+            title(['Magnetization of SW+Soft particle. SW-psi=', num2str(p.SWparticle.AngleFA/pi*180) char(176)]);
             
             
             Folder_HM = [folder 'H-M\' ];
@@ -152,7 +155,7 @@ classdef SWandP  < iMagneticParticle
             
             Folder_SW = [folder 'SW\'];
             mkdir(Folder_SW);
-            %p.SWparticle.Draw(Folder_SW);            
+            p.SWparticle.Draw(Folder_SW);            
         end;
         
         function DrawSoftMagnetization(p, folder)

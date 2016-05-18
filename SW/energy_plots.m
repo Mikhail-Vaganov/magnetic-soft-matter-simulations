@@ -3,7 +3,7 @@ clc;
 %close all;
 
 
-psi=pi/6;
+psi=1.4716;
 q=1;
 
 x=0:0.001:2*pi;
