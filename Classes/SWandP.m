@@ -138,24 +138,24 @@ classdef SWandP  < iMagneticParticle
             file_name = ['SW+Soft(' num2str(p.SWparticle.AngleFA) ')____H-M____' datestr(now,'HH_MM_SS.jpg')];
             print('-djpeg',[Folder_HM file_name]);
             
-            figure(66);
-            plot(input,outputHsw,'b.',input,outputHhi,'g.',zero_pfx,zero_pfy, 'k',zero_xx,zero_xy, 'k');
-            xlabel('H');
-            ylabel('Hsw, Hhi');
-            title(['Fields of SW+Soft particle. Gamma1=', num2str(p.Gamma1) ', Gamma2=', num2str(p.Gamma2)]);
+%             figure(66);
+%             plot(input,outputHsw,'b.',input,outputHhi,'g.',zero_pfx,zero_pfy, 'k',zero_xx,zero_xy, 'k');
+%             xlabel('H');
+%             ylabel('Hsw, Hhi');
+%             title(['Fields of SW+Soft particle. Gamma1=', num2str(p.Gamma1) ', Gamma2=', num2str(p.Gamma2)]);
             
-            Folder_Fields = [folder 'Fields\'];
-            mkdir(Folder_Fields);
-            file_name = ['SW+Soft(' num2str(p.SWparticle.AngleFA) ')____Fields____' datestr(now,'HH_MM_SS.jpg')];
-            print('-djpeg',[Folder_Fields file_name]);
+%             Folder_Fields = [folder 'Fields\'];
+%             mkdir(Folder_Fields);
+%             file_name = ['SW+Soft(' num2str(p.SWparticle.AngleFA) ')____Fields____' datestr(now,'HH_MM_SS.jpg')];
+%             print('-djpeg',[Folder_Fields file_name]);
             
             Folder_Soft_Magnet = [folder 'SoftMagnetization\'];
             mkdir(Folder_Soft_Magnet);
-            p.DrawSoftMagnetization(Folder_Soft_Magnet);
+            %p.DrawSoftMagnetization(Folder_Soft_Magnet);
             
             Folder_SW = [folder 'SW\'];
             mkdir(Folder_SW);
-            p.SWparticle.Draw(Folder_SW);            
+            %p.SWparticle.Draw(Folder_SW);            
         end;
         
         function DrawSoftMagnetization(p, folder)

@@ -16,7 +16,7 @@ classdef PikeExtendedFORC
         Hrgrid; % 2D result of meshgrid(H,Hr)
         Hr; % 1D reversal field
         H; % 1D FORC field
-        N =400; % number of FORCs
+        N =100; % number of FORCs
         Hstep;
         minHc;
         maxHc;
