@@ -5,6 +5,8 @@ classdef Pike2003Particle < iMagneticParticle
     %provided before this state magnetization was equal to -1. It switches 
     %its magnetization to -1 at external field value Beta if before this 
     %state magnetization was equal to +1.
+    % Pike et al. proposed a model of curved hysteron, which shape
+    % is cunstructed using tanh function
     %   
     
     properties

@@ -1,19 +1,24 @@
 classdef SWparticleRotative < iMagneticParticle
-    %The SWparticle represents a particle, which magnetization process is
-    %described by means of Stoner-Wohlfarth model
+    % The SWparticle represents a particle, which magnetization process is
+    % described by means of Stoner-Wohlfarth model.
+    % This particle have one level more complexity than SWparticle: the
+    % rotative term. The elastic rotation is implemented into the
+    % expression of energy.
+    %
     
     properties
         %The angle between an external field and anisotropy axis
         AngleFA;
         %Switching field
         SwField;
+        %Last applied field, which is used in order to detect the history
+        %of particle's magnetization.
         LastAppliedField;
-        Elastic;
         
         %SI
         %asume for FeNdB
         Ku = 450000; % J/m3
-        k=1/2000000; %Pa
+        k=1/2000000; %Pa - compliance
         mu0 = 1.2566e-6; %Tm/A
         Ms = 1.2733e+06;% A/m
         
