@@ -34,37 +34,33 @@ classdef SWparticle < iMagneticParticle
         end;
         
         function r = SetUp(swp)
-            swp.Magnetization=1;
-            swp.LastAppliedField = swp.PositiveSaturationField;
-            r=swp;
+            r = swp.ApplyField(swp.PositiveSaturationField);
         end;
         
         function r = SetDown(swp)
-            swp.Magnetization=-1;
-            swp.LastAppliedField = swp.NegativeSaturationField;
-            r=swp;
+            r = swp.ApplyField(swp.NegativeSaturationField);
         end;
         
-        function r = ApplyField(swp,value)
-            if value>swp.SwField
-                swp.Magnetization = swp.CosSearch(value,0);
-            elseif value<-swp.SwField
-                swp.Magnetization = swp.CosSearch(value,pi);
+        function r = ApplyField(swp,field)
+            if field>swp.SwField
+                swp.Magnetization = swp.CosSearch(field,0);
+            elseif field<-swp.SwField
+                swp.Magnetization = swp.CosSearch(field,pi);
             else
                 if swp.LastAppliedField>swp.SwField
-                    swp.Magnetization = swp.CosSearch(value,0);
+                    swp.Magnetization = swp.CosSearch(field,0);
                 elseif swp.LastAppliedField<-swp.SwField
-                    swp.Magnetization = swp.CosSearch(value,pi);
+                    swp.Magnetization = swp.CosSearch(field,pi);
                 else
                     if swp.Magnetization>=swp.LastAppliedField
-                        swp.Magnetization = swp.CosSearch(value,0);
+                        swp.Magnetization = swp.CosSearch(field,0);
                     else
-                        swp.Magnetization = swp.CosSearch(value,pi);
+                        swp.Magnetization = swp.CosSearch(field,pi);
                     end;
                 end;
             end;         
                 
-            swp.LastAppliedField = value;
+            swp.LastAppliedField = field;
             r=swp;       
         end;
         
@@ -97,6 +93,10 @@ classdef SWparticle < iMagneticParticle
         
         function H = FieldInRealUnits(swp, field)
             H = field*2*swp.Ku/swp.mu0/swp.Ms;
+        end;
+        
+        function h = FieldInRelativeUnits(swp, H)
+            h = H*swp.mu0*swp.Ms/2/swp.Ku;
         end;
         
         function H =  PositiveSaturationField(swp)

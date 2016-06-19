@@ -8,10 +8,14 @@ global Hext;
 global g1;
 global g2;
 global psi;
-global value;
+global SWMagnetization;
 
 
-sw = SWparticle(psi,value);
-sw = sw.ApplyField(H(1));
-F(1) = Hext-H(1)+g1*FroehlichKennelly(H(2));
-F(2) = Hext-H(2)+g2*sw.Magnetization;
+sw = SWparticle(psi,SWMagnetization);
+sw = sw.ApplyField(sw.FieldInRelativeUnits(H(1)));
+
+hard_magnetization = sw.MagnetizationInRealUnits();
+soft_magnetization =FroehlichKennelly(H(2));
+
+F(1) = Hext-H(1)+g1*soft_magnetization;
+F(2) = Hext-H(2)+g2*hard_magnetization;

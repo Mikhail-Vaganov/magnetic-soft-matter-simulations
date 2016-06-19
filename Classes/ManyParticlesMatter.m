@@ -30,15 +30,15 @@ classdef ManyParticlesMatter  <iMatter
         end;
         
         function Matter = Magnetize(matter, field)
-            wb = waitbar(0,'Magnetizing the matter...', 'Name', ['Magnetize at Field=' num2str(field)]);
+            %wb = waitbar(0,'Magnetizing the matter...', 'Name', ['Magnetize at Field=' num2str(field)]);
             Matter=matter;
             Matter.Magnetization = 0;
             for i=1:1:length(matter.Particles)
                  Matter.Particles(i)=Matter.Particles(i).ApplyField(field);
                  Matter.Magnetization =1.0*Matter.Magnetization+ 1.0*Matter.Particles(i).Magnetization;
-                 waitbar(i/length(matter.Particles),wb, [num2str(100*i/length(matter.Particles)) ' %'])
+                 %waitbar(i/length(matter.Particles),wb, [num2str(100*i/length(matter.Particles)) ' %'])
             end;
-            close(wb);
+            %close(wb);
             
             Matter.Magnetization = Matter.Magnetization/(1.0*length(Matter.Particles));
         end;
@@ -64,7 +64,7 @@ classdef ManyParticlesMatter  <iMatter
         end;
         
         function DrawMatterRepresentation(matter, folder)
-            t=0:0.01:2*pi;
+            t=0:0.02:2*pi;
             magnitude = max(abs(matter.NegativeSaturationField), abs(matter.PositiveSaturationField));
             h= magnitude*cos(t);
             
@@ -93,11 +93,11 @@ classdef ManyParticlesMatter  <iMatter
         
         function DrawAxes(matter, input, output, fig)
             max_magn = max(output);
-            zero_yy= -max_magn:0.01:max_magn;
+            zero_yy= -max_magn:(max_magn/10):max_magn;
             zero_yx = zeros(length(zero_yy),1);
             
             max_field=max(input);
-            zero_xx= -max_field:0.01:max_field;
+            zero_xx= -max_field:(max_field/10):max_field;
             zero_xy = zeros(length(zero_xx),1);
             
             figure(fig);

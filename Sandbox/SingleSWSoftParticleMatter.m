@@ -16,7 +16,7 @@ sw = SWparticle(0*(pi/180),1);
 sw_p = SWandP(sw);
 sw_p.Gamma1=0.2;
 sw_p.Gamma2=1;
-sw_p.Beta_hi=1;
+sw_p.Beta_hi=2/sw_p.PositiveSaturationField();
 %sw.DrawInFig(folder,figure(57),'.b');
 sw_p.Draw(folder,figure(55),'.b');
 %sw_p.DrawSoftMagnetization(folder);
@@ -25,7 +25,7 @@ sw_p.Draw(folder,figure(55),'.b');
 
 matter = SingleParticleMatter(sw_p);
 %matter.DrawMatterRepresentation(folder);
-
+return;
 %--------------------------%
 %Pike FORC
 tic

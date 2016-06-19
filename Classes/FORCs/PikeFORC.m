@@ -75,21 +75,24 @@ classdef PikeFORC
         end;
         
         function forc = MagnetizationFORC (e)
-            wb = waitbar(0,'MagnetizationFORC...', 'Name', 'MagnetizationFORC');
-            
+            wb1 = waitbar(0,'MagnetizationFORC (Hr)...', 'Name', 'MagnetizationFORC');
+                        
             for i=1:1:length(e.Hr);
                 e.Matter=e.Matter.SaturateToPositive();
                 e.Matter=e.Matter.Magnetize(e.Hr(i));
+                wb2 = waitbar(0,'MagnetizationFORC (H)...', 'Name', 'MagnetizationFORC');
                 for j=1:1:length(e.H);
                     if(e.H(j)>=e.Hr(i))
                         e.Matter=e.Matter.Magnetize(e.H(j));
                         e.Mgrid(i,j)= e.Matter.Magnetization;
                     end;
+                    waitbar(j/length(e.H),wb2, [num2str(100*j/length(e.H)) ' %'])
                 end;
-                waitbar(i/length(e.Hr),wb, [num2str(100*i/length(e.Hr)) ' %'])
+                close(wb2);
+                waitbar(i/length(e.Hr),wb1, [num2str(100*i/length(e.Hr)) ' %'])
             end;
             forc=e;
-            close(wb);
+            close(wb1);
         end;
         
         function forc = CalculateFORCDistribution(e)

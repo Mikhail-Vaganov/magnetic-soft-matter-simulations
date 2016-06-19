@@ -18,7 +18,7 @@ classdef SWandP  < iMagneticParticle
         HonHi;
         HonSw;
         Beta_hi=0.01;
-        Msat_hi=1 %1720000; % A/m for Fe
+        Msat_hi=1720000; % A/m for Fe
         
         SoftConcentration=0.5;
         HardConcentration=0.5;
@@ -37,21 +37,18 @@ classdef SWandP  < iMagneticParticle
         end;
         
         function r = SetUp(p)
-            r=p.ApplyField(p.SaturationField);
+            r=p.ApplyField(p.PositiveSaturationField());
         end;
         
         function r = SetDown(p)
-            r=p.ApplyField(-p.SaturationField);
+            r=p.ApplyField(-p.PositiveSaturationField());
         end;
         
         function m = ParamagnetM(p, field)
             global Msat_hi;
             global beta_hi;
-            global sw;
             Msat_hi=p.Msat_hi;
             beta_hi=p.Beta_hi;
-            sw=p.SWparticle;
-            
             m=FroehlichKennelly(field);
         end;
         
@@ -62,7 +59,7 @@ classdef SWandP  < iMagneticParticle
             global g1
             global g2
             global psi
-            global value;
+            global SWMagnetization;
             
             global Msat_hi;
             global beta_hi;
@@ -71,32 +68,34 @@ classdef SWandP  < iMagneticParticle
             g1 = p.Gamma1;
             g2 = p.Gamma2;
             psi = p.SWparticle.AngleFA;
-            value = p.SWparticle.Magnetization;
+            SWMagnetization = p.SWparticle.Magnetization;
             
             Msat_hi=p.Msat_hi;
             beta_hi=p.Beta_hi;
             OPTIONS = optimoptions('fsolve','Algorithm','trust-region-reflective','Display','off'); 
     
             [H, fval, ex_code] = fsolve(fun,H0,OPTIONS);
-            
         end;
         
         function r = ApplyField(p,field)
             H = p.GetFieldsOnParticles(field);
             p.HonSw=H(1);
             p.HonHi=H(2);
-            P_m = p.ParamagnetM(H(2));
-            p.SWparticle =p.SWparticle.ApplyField(H(1));
-            p.Magnetization =p.HardConcentration*p.SWparticle.Magnetization + p.SoftConcentration*P_m;
+                        
+            p.SWparticle =p.SWparticle.ApplyField(p.SWparticle.FieldInRelativeUnits(H(1)));
+            H_m =  p.SWparticle.MagnetizationInRealUnits();
+            S_m = p.ParamagnetM(H(2));
+            p.Magnetization =p.HardConcentration*H_m + p.SoftConcentration*S_m;
+            
             r = p;
         end;
         
-        function h = PositiveSaturationField(p)
-            h = p.SaturationField;
+        function H = PositiveSaturationField(p)
+            H=p.SWparticle.FieldInRealUnits(p.SaturationField);
         end;
         
-        function h = NegativeSaturationField(p)
-            h = - p.SaturationField;
+        function H = NegativeSaturationField(p)
+            H=-p.SWparticle.FieldInRealUnits(p.SaturationField);
         end;
         
         function Draw(p,folder, fig, options)
@@ -109,21 +108,23 @@ classdef SWandP  < iMagneticParticle
             outputHsw = zeros(len,1);
             outputHhi = zeros(len,1);
             output=zeros(len,1);
+            
+            wb = waitbar(0,'Draw Soft-Hard particle...', 'Name', 'Magnetizationg');
             for i=1:1:len;
                 p = p.ApplyField(input(i));
                 output(i) = p.Magnetization;
-                outputHsw(i) = p.HonSw;
-                outputHhi(i) = p.HonHi;
+                waitbar(i/len,wb, [num2str(100*i/len) ' %'])
             end;
+            close(wb);
             
             mkdir(folder);
             
             max_magn = max(output);
-            zero_yy= -max_magn:0.01:max_magn;
+            zero_yy= -max_magn:(max_magn/10):max_magn;
             zero_yx = zeros(length(zero_yy),1);
             
             max_field=max(input);
-            zero_xx= -max_field:0.01:max_field;
+            zero_xx= -max_field:(max_field/10):max_field;
             zero_xy = zeros(length(zero_xx),1);
             
             figure(fig);
@@ -231,22 +232,22 @@ classdef SWandP  < iMagneticParticle
         
         function DrawSoftMagnetization(p, folder)
             t=0:0.01:2*pi;
-            magnitude=p.PositiveSaturationField*6;
+            magnitude=p.PositiveSaturationField()*6;
             input = magnitude*cos(t);
             len=length(input);
             
             output=zeros(len,1);
             for i=1:1:len;
-                p = p.ApplyField(input(i));
+                %p = p.ApplyField(input(i));
                 output(i) = p.ParamagnetM(input(i));
             end;
             
             max_magn = max(output);
-            zero_yy= -max_magn:0.01:max_magn;
+            zero_yy= -max_magn:(max_magn/10):max_magn;
             zero_yx = zeros(length(zero_yy),1);
             
             max_field=max(input);
-            zero_xx= -max_field:0.01:max_field;
+            zero_xx= -max_field:(max_field/10):max_field;
             zero_xy = zeros(length(zero_xx),1);
             
             figure(77);
@@ -269,6 +270,7 @@ classdef SWandP  < iMagneticParticle
             neg_to_pos = magnitude*cos(t2);
             p=p.PrepareParticle(pos_to_neg, neg_to_pos);
         end
+        
         function p = PrepareParticle(p, pos_to_neg, neg_to_pos)
             len1=length(pos_to_neg);
             len2=length(neg_to_pos);
