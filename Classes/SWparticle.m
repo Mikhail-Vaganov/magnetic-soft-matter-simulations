@@ -12,6 +12,9 @@ classdef SWparticle < iMagneticParticle
         Ku = 450000; % J/m3
         mu0 = 1.2566e-6; %Tm/A
         Ms = 1.2733e+06;% A/m
+        
+        M_H_up; %the upper branch of the M-H loop
+        M_H_dn; %the lower branch of the M-H loop
     end
     
     methods
@@ -26,6 +29,8 @@ classdef SWparticle < iMagneticParticle
             sw.LastAppliedField=0;
             t= nthroot(tan(psi),3);
             sw.SwField = sqrt(1-t^2+t^4)/(1+t^2);
+            sw.M_H_up=containers.Map('KeyType','double','ValueType','double');
+            sw.M_H_dn=containers.Map('KeyType','double','ValueType','double');
         end;
         
         function r = SetUp(swp)
@@ -64,8 +69,34 @@ classdef SWparticle < iMagneticParticle
         end;
         
         function c=CosSearch(swp,value, angle)
+             if angle==0
+                if swp.M_H_up.isKey(value)
+                    c=swp.M_H_up(value);
+                    return;
+                end;
+            elseif angle==pi
+                 if swp.M_H_dn.isKey(value)
+                    c=swp.M_H_dn(value);
+                    return;
+                end;
+            end;
+            
             energy = @(fi) 0.5*sin(swp.AngleFA-fi)^2-value*cos(fi);
             c=cos(fminsearch(energy,angle,optimset('TolFun', 1e-8,'TolX',1e-8,'MaxIter',1000,'MaxFunEvals',1000)));
+        
+            if angle==0
+                swp.M_H_up(value)=c;
+            elseif angle==pi
+                swp.M_H_dn(value)=c;
+            end;
+        end;
+        
+        function M = MagnetizationInRealUnits(swp)
+            M = swp.Magnetization*swp.Ms;
+        end;
+        
+        function H = FieldInRealUnits(swp, field)
+            H = field*2*swp.Ku/swp.mu0/swp.Ms;
         end;
         
         function H =  PositiveSaturationField(swp)
@@ -114,12 +145,11 @@ classdef SWparticle < iMagneticParticle
             output=zeros(length(t),1);
             for i=1:1:length(t);
                 swp = swp.ApplyField(input(i));
-                output(i) = swp.Magnetization;
+                output(i) = swp.MagnetizationInRealUnits();
             end;
             
-            input=input*2*swp.Ku/swp.mu0/swp.Ms;
-            output = output*swp.Ms;
-            switchingField = round(swp.SwField*2*swp.Ku/swp.mu0/swp.Ms,2);
+            input=swp.FieldInRealUnits(input);
+            switchingField = round(swp.FieldInRealUnits(swp.SwField),2);
            
             figure(figHandler);
             plot(input,output,options);

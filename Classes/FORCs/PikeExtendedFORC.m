@@ -1,4 +1,4 @@
-classdef PikeFORC
+classdef PikeExtendedFORC
     %RETRIEVEDATABYPIKE Summary of this class goes here
     %   Detailed explanation goes here
     %   Hu = (Hr+H)/2
@@ -16,7 +16,7 @@ classdef PikeFORC
         Hrgrid; % 2D result of meshgrid(H,Hr)
         Hr; % 1D reversal field
         H; % 1D FORC field
-        N =50; % number of FORCs
+        N =100; % number of FORCs
         Hstep;
         minHc;
         maxHc;
@@ -31,12 +31,12 @@ classdef PikeFORC
         FolderForResults_common;
         PgridHHr; % FORC distribution in (H,Hr) coordinates
         PgridHcHu; % FORC distribution in (Hc,Hu) coordinates
-        SF=3; %smoothing factor
+        SF=4; %smoothing factor
     end
     
     methods
-        function experiment = PikeFORC(maxHc, minHu, maxHu, matter, folder)
-            minHc=0;
+        function experiment = PikeExtendedFORC(maxHc, minHu, maxHu, matter, folder)
+            minHc=-1;
             experiment.maxHr = maxHu - minHc;
             experiment.minHr = minHu - maxHc;
             experiment.maxH = maxHu+maxHc;
@@ -75,28 +75,41 @@ classdef PikeFORC
         end;
         
         function forc = MagnetizationFORC (e)
-            for i=1:1:length(e.Hr);
+            wb = waitbar(0,'MagnetizationFORC...', 'Name', 'MagnetizationFORC');
+            
+            for i=1:1:length(e.Hr); 
                 e.Matter=e.Matter.SaturateToPositive();
                 e.Matter=e.Matter.Magnetize(e.Hr(i));
                 for j=1:1:length(e.H);
                     if(e.H(j)>=e.Hr(i))
                         e.Matter=e.Matter.Magnetize(e.H(j));
                         e.Mgrid(i,j)= e.Matter.Magnetization;
+                    else
+                        e.Mgrid(i,j) = e.Mgrid(j,j);
                     end;
                 end;
+                waitbar(i/length(e.Hr),wb, [num2str(100*i/length(e.Hr)) ' %'])
             end;
             forc=e;
+            
+            close(wb);
         end;
         
         function forc = CalculateFORCDistribution(e)
+            wb = waitbar(0,'GetLocalFORCDistribution...', 'Name', 'GetLocalFORCDistribution');
             for i=1:1:length(e.Hr);
                 for j=1:1:length(e.H);
-                    if(e.H(j)>=e.Hr(i))
-                        e.PgridHHr(i,j)=e.GetLocalFORCDistribution(i,j);
-                    end;
+                    e.PgridHHr(i,j)=e.GetLocalFORCDistribution(i,j);
+               
+%                     if(e.H(j)>=e.Hr(i))
+%                         e.PgridHHr(i,j)=e.GetLocalFORCDistribution(i,j);
+%                     end;
                 end;
+                waitbar(i/length(e.Hr),wb, [num2str(100*i/length(e.Hr)) ' %'])
             end;    
+            close(wb);
             
+            wb = waitbar(0,'Coordinates transformation...', 'Name', 'Coordinates transformation');
             for i=1:1:length(e.Hr);
                 for j=1:1:length(e.H);
                 	e.Hugrid(i,j)=round((e.H(j) + e.Hr(i))/2,4);
@@ -109,8 +122,10 @@ classdef PikeFORC
                         e.PgridHcHu(i,j) = NaN;
                     end;
                 end;
+                waitbar(i/length(e.Hr),wb, [num2str(100*i/length(e.Hr)) ' %'])
             end;
             forc=e;
+            close(wb);
         end;
         
         function p=GetLocalFORCDistribution(e,i,j)
@@ -142,6 +157,7 @@ classdef PikeFORC
                 
             FIT = fit([h, hr],m,'poly22');
             p=-FIT.p11;
+            %[FIT.p00,FIT.p10,FIT.p01,FIT.p11,FIT.p20,FIT.p02]
         end;
         
         function DrawMagnetizatinFORC(forc)
@@ -192,7 +208,7 @@ classdef PikeFORC
             print('-djpeg',[forc.FolderForResults_with_time filesep 'FORC diagram in Hc-Hu ' datestr(now,'HH_MM_SS')]);
             
             figure(5);
-            contourf(forc.Hcgrid,forc.Hugrid,-forc.PgridHcHu);
+            contourf(forc.Hcgrid,forc.Hugrid,-forc.PgridHcHu,8);
             grid on;
             title('FORC diagram');
             xlabel('Hc');
@@ -258,8 +274,8 @@ classdef PikeFORC
             end;
             
             figure(7);
-            plot(hc,p,'k');
-            title(['Coercivity ridge (Hu=' num2str(hu_value) ')']);
+            plot(hc,p,'b');
+            title(['Coercivity ridge (' num2str(hu_value) ')']);
             xlabel('Hc');
             ylabel('P');
             
@@ -307,7 +323,6 @@ classdef PikeFORC
             e.DrawFORCDiagramHHr();
             e.DrawFORCDiagramHcHu();
             e.DrawCoercivityRidge(0);
-            e.DrawInteractionRidge(1);
         end;
     end
     

@@ -30,12 +30,16 @@ classdef ManyParticlesMatter  <iMatter
         end;
         
         function Matter = Magnetize(matter, field)
+            wb = waitbar(0,'Magnetizing the matter...', 'Name', ['Magnetize at Field=' num2str(field)]);
             Matter=matter;
             Matter.Magnetization = 0;
             for i=1:1:length(matter.Particles)
                  Matter.Particles(i)=Matter.Particles(i).ApplyField(field);
                  Matter.Magnetization =1.0*Matter.Magnetization+ 1.0*Matter.Particles(i).Magnetization;
+                 waitbar(i/length(matter.Particles),wb, [num2str(100*i/length(matter.Particles)) ' %'])
             end;
+            close(wb);
+            
             Matter.Magnetization = Matter.Magnetization/(1.0*length(Matter.Particles));
         end;
         
@@ -64,11 +68,14 @@ classdef ManyParticlesMatter  <iMatter
             magnitude = max(abs(matter.NegativeSaturationField), abs(matter.PositiveSaturationField));
             h= magnitude*cos(t);
             
+            wb = waitbar(0,'Visualizing the matter...', 'Name', 'DrawMatterRepresentation');
             m=zeros(length(t),1);
             for i=1:1:length(t)
+                waitbar(i/length(t),wb, [num2str(100*i/length(t)) ' %'])
                 matter=matter.Magnetize(h(i));
                 m(i)=matter.Magnetization;
             end;
+            close(wb);
             
             fig=figure(999);
             plot(h,m,'b.');

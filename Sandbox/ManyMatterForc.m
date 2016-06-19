@@ -2,7 +2,7 @@ clc;
 clear all;
 close all;
 
-len=20;
+len=200;
 r = randn(1,len);
 
 for i=1:1:len
@@ -16,14 +16,14 @@ end;
 
 %sw = SWparticle(pi/8,1);
 
-
+tic
 folder='Results\';
 mkdir(folder);
 MultiParticleMatter = ManyParticlesMatter(hs_p);
-MpForc = GoodFORC(2,-1,1, MultiParticleMatter,folder);
+MpForc = PikeExtendedFORC(2,-1,1, MultiParticleMatter,folder);
 MpForc=MpForc.MagnetizationFORC();
 MpForc=MpForc.CalculateFORCDistribution();
-
+toc
 
 % for i=1:1:length(sw)
 % SingleParticleMatter = SingleParticleMatter(sw(i));

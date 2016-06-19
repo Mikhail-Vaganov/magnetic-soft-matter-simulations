@@ -1,7 +1,8 @@
 clc;
+clear all;
 close all;
-
-sw = SWparticle(pi/9,1);
+folder =  'Results\';
+sw = SWparticle(0*(pi/180),1);
 
 %gamma2 = 0.01:0.005:1;
 % for i=1:1:length(gamma2)
@@ -10,16 +11,42 @@ sw = SWparticle(pi/9,1);
 %     sw_p(i).Gamma2=gamma2(i);
 % end;
 
-sw_p = SWandP(sw);
-sw_p.Gamma1=0.1;
-sw_p.Gamma2=0.1;
-sw_p.Beta_hi=2;
-sw_p.Draw('results_9889/');
 
+
+sw_p = SWandP(sw);
+sw_p.Gamma1=0.2;
+sw_p.Gamma2=1;
+sw_p.Beta_hi=1;
+%sw.DrawInFig(folder,figure(57),'.b');
+sw_p.Draw(folder,figure(55),'.b');
+%sw_p.DrawSoftMagnetization(folder);
+%sw_p.DrawFields(folder)
+%---------------------%
+
+matter = SingleParticleMatter(sw_p);
+%matter.DrawMatterRepresentation(folder);
+
+%--------------------------%
+%Pike FORC
+tic
+SHForc = PikeFORC(2,-1.5,0.5, matter, folder);
+SHForc=SHForc.MagnetizationFORC();
+SHForc=SHForc.CalculateFORCDistribution();
+SHForc.DrawResults();
+toc
+%--------------------------%
+%Pike extended FORC
+return;
+tic
+SHForc = PikeExtendedFORC(2,-2,2, matter, folder);
+SHForc=SHForc.MagnetizationFORC();
+SHForc=SHForc.CalculateFORCDistribution();
+SHForc.DrawResults();
+toc
+%---------------------%
+% My FORC method
 for i=1:1:0%length(sw_p)
     SHMatter = SingleParticleMatter(sw_p(i));
-    SHForc = FORC(SHMatter, 'Results_now_556/');
+    SHForc = FORC(SHMatter, folder);
     SHForc.MagnetizationFORC();
-    [x,fval] = fminunc(SHForc.Pfit);
 end;
-

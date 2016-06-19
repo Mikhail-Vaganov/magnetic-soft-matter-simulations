@@ -1,7 +1,7 @@
 clc;
 close all;
 %clear all;
-
+folder='Results\';
 
 h2 =  [ 
     TwoHysterons(Hysteron(1,3,-3),Hysteron(1,6,-6))
@@ -16,6 +16,6 @@ h2 =  [
 h2 = [TwoHysterons(Hysteron(1,4,2),Hysteron(1,0,-6))];
 for i=1:1:length(h2)
     SHMatter = SingleParticleMatter(h2(i));
-    SHForc = FORC(SHMatter);
+    SHForc = FORC(SHMatter,folder);
     SHForc.MagnetizationFORC();
 end;

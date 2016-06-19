@@ -3,7 +3,9 @@ classdef SingleParticleMatter <iMatter
     %   Detailed explanation goes here
     
     properties
-        Particle;        
+        Particle;
+        LastField;
+        LastUpperBranch=true;
     end
     
        

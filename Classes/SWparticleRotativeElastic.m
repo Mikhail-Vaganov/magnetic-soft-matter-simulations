@@ -144,7 +144,7 @@ classdef SWparticleRotativeElastic < iMagneticParticle
             
             figure(figHandler);
             plot(input,output,options);
-            title(['Hyseresis of Stoner-Wohlfarth particle. alpha=' num2str(swp.AngleFA/pi*180) char(176) ' SwField=' num2str(switchingField) ' A/m'] );
+            title(['Hyseresis of SW+rot+elast particle. alpha=' num2str(swp.AngleFA/pi*180) char(176) ' SwField=' num2str(switchingField) ' A/m'] );
             xlabel('H, A/m');
             ylabel('M, A/m');
             

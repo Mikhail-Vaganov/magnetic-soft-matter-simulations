@@ -1,6 +1,8 @@
 clc;
 close all;
 
+folder='Results\';
+
 sw = SWparticle(pi*60/180,1);
 
 swRot=SWparticleRotative(pi*80/180,1);
@@ -8,11 +10,11 @@ swRot=SWparticleRotative(pi*80/180,1);
 swRot2=SWparticleRotative(pi*80/180,1);
 swRot2.k=swRot.k*100;
 
-swRotElastic=SWparticleRotativeElastic(pi*65/180,1);
+swRotElastic=SWparticleRotativeElastic(pi*80/180,1);
 
 figure(2);
 hold on;
-
+% swRot.DrawInFig(folder,2,'b.');
 %  swP=SWandP(sw);
 %  swP.Beta_hi=4;
 %  swP.Msat_hi=1;
@@ -31,6 +33,6 @@ hold on;
 swProt3=SWandP(swRotElastic);
 swProt3.Beta_hi=4;
 swProt3.Msat_hi=1;
-swProt3.Draw('res/',2,'b');
+swProt3.Draw(folder,2,'b');
 
 hold off;

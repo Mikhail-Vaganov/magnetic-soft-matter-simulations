@@ -1,6 +1,9 @@
 clc;
 close all;
 
+folder = 'Results/';
+
+
 hysts = [
     Hysteron(1,4, 2)
     Hysteron(1,6, 2)
@@ -17,6 +20,6 @@ hysts = Hysteron(1,4,-4);
 
 for i=1:1:length(hysts)
     SHMatter = SingleParticleMatter(hysts(i));
-    SHForc = FORC(SHMatter);
-    %SHForc.MagnetizationFORC();
+    SHForc = FORC(SHMatter, folder);
+    SHForc.MagnetizationFORC();
 end;

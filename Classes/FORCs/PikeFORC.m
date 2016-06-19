@@ -1,4 +1,4 @@
-classdef PikeExtendedFORC
+classdef PikeFORC
     %RETRIEVEDATABYPIKE Summary of this class goes here
     %   Detailed explanation goes here
     %   Hu = (Hr+H)/2
@@ -31,12 +31,12 @@ classdef PikeExtendedFORC
         FolderForResults_common;
         PgridHHr; % FORC distribution in (H,Hr) coordinates
         PgridHcHu; % FORC distribution in (Hc,Hu) coordinates
-        SF=3; %smoothing factor
+        SF=4; %smoothing factor
     end
     
     methods
-        function experiment = PikeExtendedFORC(maxHc, minHu, maxHu, matter, folder)
-            minHc=-1;
+        function experiment = PikeFORC(maxHc, minHu, maxHu, matter, folder)
+            minHc=0;
             experiment.maxHr = maxHu - minHc;
             experiment.minHr = minHu - maxHc;
             experiment.maxH = maxHu+maxHc;
@@ -75,6 +75,8 @@ classdef PikeExtendedFORC
         end;
         
         function forc = MagnetizationFORC (e)
+            wb = waitbar(0,'MagnetizationFORC...', 'Name', 'MagnetizationFORC');
+            
             for i=1:1:length(e.Hr);
                 e.Matter=e.Matter.SaturateToPositive();
                 e.Matter=e.Matter.Magnetize(e.Hr(i));
@@ -82,24 +84,27 @@ classdef PikeExtendedFORC
                     if(e.H(j)>=e.Hr(i))
                         e.Matter=e.Matter.Magnetize(e.H(j));
                         e.Mgrid(i,j)= e.Matter.Magnetization;
-                    else
-                        e.Mgrid(i,j) = e.Mgrid(j,j);
                     end;
                 end;
+                waitbar(i/length(e.Hr),wb, [num2str(100*i/length(e.Hr)) ' %'])
             end;
             forc=e;
+            close(wb);
         end;
         
         function forc = CalculateFORCDistribution(e)
+            wb = waitbar(0,'CalculateFORCDistribution...', 'Name', 'CalculateFORCDistribution');
             for i=1:1:length(e.Hr);
                 for j=1:1:length(e.H);
-                    e.PgridHHr(i,j)=e.GetLocalFORCDistribution(i,j);
-%                     if(e.H(j)>=e.Hr(i))
-%                         e.PgridHHr(i,j)=e.GetLocalFORCDistribution(i,j);
-%                     end;
+                    if(e.H(j)>=e.Hr(i))
+                        e.PgridHHr(i,j)=e.GetLocalFORCDistribution(i,j);
+                    end;
                 end;
-            end;    
+                waitbar(i/length(e.Hr),wb, [num2str(100*i/length(e.Hr)) ' %'])
+            end; 
+            close(wb);   
             
+            wb = waitbar(0,'Coordinates transformation...', 'Name', 'Coordinates transformation');
             for i=1:1:length(e.Hr);
                 for j=1:1:length(e.H);
                 	e.Hugrid(i,j)=round((e.H(j) + e.Hr(i))/2,4);
@@ -112,8 +117,10 @@ classdef PikeExtendedFORC
                         e.PgridHcHu(i,j) = NaN;
                     end;
                 end;
+                waitbar(i/length(e.Hr),wb, [num2str(100*i/length(e.Hr)) ' %'])
             end;
             forc=e;
+            close(wb);
         end;
         
         function p=GetLocalFORCDistribution(e,i,j)
@@ -145,11 +152,10 @@ classdef PikeExtendedFORC
                 
             FIT = fit([h, hr],m,'poly22');
             p=-FIT.p11;
-            %[FIT.p00,FIT.p10,FIT.p01,FIT.p11,FIT.p20,FIT.p02]
         end;
         
         function DrawMagnetizatinFORC(forc)
-            figure(1);
+            figure(11);
             mesh(forc.Hgrid,forc.Hrgrid,forc.Mgrid);
             grid on;
             title('Magnetization');
@@ -161,7 +167,7 @@ classdef PikeExtendedFORC
         end;
         
         function DrawFORCDiagramHHr(forc)
-            figure(2);
+            figure(12);
             mesh(forc.Hgrid,forc.Hrgrid,forc.PgridHHr);
             grid on;
             title('FORC diagram');
@@ -171,8 +177,8 @@ classdef PikeExtendedFORC
             print('-djpeg',[forc.FolderForResults_common filesep 'FORC diagram in H-Hr' filesep datestr(now,'HH_MM_SS')]);
             print('-djpeg',[forc.FolderForResults_with_time filesep 'FORC diagram in H-Hr ' datestr(now,'HH_MM_SS')]);
             
-            figure(3);
-            contourf(forc.Hgrid,forc.Hrgrid,forc.PgridHHr);
+            figure(13);
+            contourf(forc.Hgrid,forc.Hrgrid,forc.PgridHHr,8);
             grid on;
             title('FORC diagram');
             xlabel('H');
@@ -185,7 +191,7 @@ classdef PikeExtendedFORC
         end;
         
         function DrawFORCDiagramHcHu(forc)
-            figure(4);
+            figure(14);
             mesh(forc.Hcgrid,forc.Hugrid,forc.PgridHcHu);
             grid on;
             title('FORC diagram');
@@ -195,8 +201,8 @@ classdef PikeExtendedFORC
             print('-djpeg',[forc.FolderForResults_common filesep 'FORC diagram in Hc-Hu' filesep datestr(now,'HH_MM_SS')]);
             print('-djpeg',[forc.FolderForResults_with_time filesep 'FORC diagram in Hc-Hu ' datestr(now,'HH_MM_SS')]);
             
-            figure(5);
-            contourf(forc.Hcgrid,forc.Hugrid,-forc.PgridHcHu);
+            figure(15);
+            contourf(forc.Hcgrid,forc.Hugrid,-forc.PgridHcHu,8);
             grid on;
             title('FORC diagram');
             xlabel('Hc');
@@ -213,7 +219,7 @@ classdef PikeExtendedFORC
         end;
         
         function DrawFORCs (e)
-            figure(6);
+            figure(16);
             for i=1:1:length(e.Hr);
                 for j=1:1:length(e.H);
                     if(e.H(j)>=e.H(i))
@@ -261,9 +267,9 @@ classdef PikeExtendedFORC
                 j=j-1;
             end;
             
-            figure(7);
-            plot(hc,p,'b');
-            title(['Coercivity ridge (' num2str(hu_value) ')']);
+            figure(17);
+            plot(hc,p,'k');
+            title(['Coercivity ridge (Hu=' num2str(hu_value) ')']);
             xlabel('Hc');
             ylabel('P');
             
@@ -294,7 +300,7 @@ classdef PikeExtendedFORC
                 j=j+1;
             end;
             
-            figure(8);
+            figure(18);
             plot(hu,p,'k');
             title(['Interaction ridge (Hc=' num2str(hc_value) ')']);
             xlabel('Hu');
@@ -311,6 +317,7 @@ classdef PikeExtendedFORC
             e.DrawFORCDiagramHHr();
             e.DrawFORCDiagramHcHu();
             e.DrawCoercivityRidge(0);
+            e.DrawInteractionRidge(1);
         end;
     end
     

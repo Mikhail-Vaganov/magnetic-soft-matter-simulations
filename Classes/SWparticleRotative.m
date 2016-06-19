@@ -5,6 +5,19 @@ classdef SWparticleRotative < iMagneticParticle
     % rotative term. The elastic rotation is implemented into the
     % expression of energy.
     %
+    %
+    % Units of mesurement.
+    %
+    % Since the output magnetization of the SW particle is represented by
+    % the cosine of the angle between anystropy axis and the external
+    % field, it is important to transform it into the ultimate values of
+    % the magnetization.
+    %
+    % This can be made by multiplying the external field h to  
+    % H = h*   (2*Ku / mu0*Ms)
+    %
+    % And by multiplying the magnetization by Ms
+    
     
     properties
         %The angle between an external field and anisotropy axis
@@ -29,6 +42,9 @@ classdef SWparticleRotative < iMagneticParticle
         % Ku=
         % Ms= 1.2733e+06 A/m
         % Coercivity: 905000 A/m
+        
+        M_H_up; %the upper branch of the M-H loop
+        M_H_dn; %the lower branch of the M-H loop
     end
     
     methods
@@ -43,6 +59,8 @@ classdef SWparticleRotative < iMagneticParticle
             sw.LastAppliedField=0;
             t= nthroot(tan(psi),3);
             sw.SwField = sqrt(1-t^2+t^4)/(1+t^2);
+            sw.M_H_up=containers.Map('KeyType','double','ValueType','double');
+            sw.M_H_dn=containers.Map('KeyType','double','ValueType','double');
         end;
         
         function r = SetUp(swp)
@@ -81,8 +99,26 @@ classdef SWparticleRotative < iMagneticParticle
         end;
         
         function c=CosSearch(swp,value, angle)
+            if angle==0
+                if swp.M_H_up.isKey(value)
+                    c=swp.M_H_up(value);
+                    return;
+                end;
+            elseif angle==pi
+                 if swp.M_H_dn.isKey(value)
+                    c=swp.M_H_dn(value);
+                    return;
+                end;
+            end;
+            
             energy = @(fi) 0.5*sin(swp.AngleFA-fi-value*sin(fi)*2*swp.Ku*swp.k)^2-value*cos(fi)+swp.k*swp.Ku*(value*sin(fi))^2;
             c=cos(fminsearch(energy,angle,optimset('TolFun', 1e-8,'TolX',1e-8,'MaxIter',1000,'MaxFunEvals',1000)));
+            
+             if angle==0
+                swp.M_H_up(value)=c;
+             elseif angle==pi
+                swp.M_H_dn(value)=c;
+             end;
         end;
         
         function H =  PositiveSaturationField(swp)

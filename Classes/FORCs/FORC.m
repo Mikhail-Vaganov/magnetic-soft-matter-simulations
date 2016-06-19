@@ -1,6 +1,7 @@
 classdef FORC
     %FORC_OF_SINGLE Summary of this class goes here
     %   Detailed explanation goes here
+    % This is my first FORC class by my own
     
     properties
         Matter;
@@ -23,7 +24,7 @@ classdef FORC
             %obj.FolderForResult = ['Results\',datestr(now,'HH_MM_SS'),'\'];
             obj.FolderForResult = folder;
             mkdir(obj.FolderForResult);
-            obj.Matter.DrawMatterRepresentation(obj.FolderForResult);
+            %obj.Matter.DrawMatterRepresentation(obj.FolderForResult);
         end;
         
         function [M] = MagnetizationFORC (forc_item)
@@ -46,10 +47,10 @@ classdef FORC
                 end;
             end;
             
-            %forc_item.DrawMagnetizatinFORC(ha,hb,M);
+            forc_item.DrawMagnetizatinFORC(ha,hb,M);
             [Hb,Ha] = meshgrid(hb,ha);
             [Hc, Hu, P] = forc_item.DiagamFORC(Ha,Hb,M);
-            %forc_item.DrawDiagramFORC(Hc,Hu,P);
+            forc_item.DrawDiagramFORC(Hc,Hu,P);
         end;
         
         function r=DrawMagnetizatinFORC(forc, ha,hb,M)
