@@ -2,7 +2,7 @@ clc;
 clear all;
 close all;
 folder =  'Results\';
-sw = SWparticle(0*(pi/180),1);
+sw = SWparticleRotative(0*(pi/180),1);
 
 %gamma2 = 0.01:0.005:1;
 % for i=1:1:length(gamma2)
@@ -16,13 +16,13 @@ sw = SWparticle(0*(pi/180),1);
 sw_p = SWandP(sw);
 sw_p.Gamma1=0.2;
 sw_p.Gamma2=1;
-sw_p.Beta_hi=2/sw_p.PositiveSaturationField();
+sw_p.Beta_hi=6/sw_p.PositiveSaturationField();
 %sw.DrawInFig(folder,figure(57),'.b');
-sw_p.Draw(folder,figure(55),'.b');
+sw_p.Draw(figure(55),folder);
 %sw_p.DrawSoftMagnetization(folder);
 %sw_p.DrawFields(folder)
 %---------------------%
-
+return;
 matter = SingleParticleMatter(sw_p);
 %matter.DrawMatterRepresentation(folder);
 return;

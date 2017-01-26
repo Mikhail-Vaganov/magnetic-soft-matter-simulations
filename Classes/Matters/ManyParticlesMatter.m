@@ -34,13 +34,27 @@ classdef ManyParticlesMatter  <iMatter
             Matter=matter;
             Matter.Magnetization = 0;
             for i=1:1:length(matter.Particles)
-                 Matter.Particles(i)=Matter.Particles(i).ApplyField(field);
+                 Matter.Particles(i)=Matter.Particles(i).GetMagnetization(field);
                  Matter.Magnetization =1.0*Matter.Magnetization+ 1.0*Matter.Particles(i).Magnetization;
                  %waitbar(i/length(matter.Particles),wb, [num2str(100*i/length(matter.Particles)) ' %'])
             end;
             %close(wb);
             
             Matter.Magnetization = Matter.Magnetization/(1.0*length(Matter.Particles));
+        end;
+        
+        function Matter = MagnetizeInRealUnits(matter, field)
+            %wb = waitbar(0,'Magnetizing the matter...', 'Name', ['Magnetize at Field=' num2str(field)]);
+            Matter=matter;
+            Matter.MagnetizationInRealUnits = 0;
+            for i=1:1:length(matter.Particles)
+                 Matter.Particles(i)=Matter.Particles(i).GetMagnetizationInRealUnits(field);
+                 Matter.MagnetizationInRealUnits =1.0*Matter.MagnetizationInRealUnits+ 1.0*Matter.Particles(i).MagnetizationInRealUnits;
+                 %waitbar(i/length(matter.Particles),wb, [num2str(100*i/length(matter.Particles)) ' %'])
+            end;
+            %close(wb);
+            
+            Matter.MagnetizationInRealUnits = Matter.MagnetizationInRealUnits/(1.0*length(Matter.Particles));
         end;
         
         function  Matter =  SaturateToPositive(matter)
@@ -106,6 +120,23 @@ classdef ManyParticlesMatter  <iMatter
             hold off;
         end;
         
+        function matter = PrepareMatter(matter, neg_to_pos, pos_to_neg)
+            wb = waitbar(0,'Preparation of matter...', 'Name', 'PrepareParticle');
+            for i=1:1:length(matter.Particles)
+                matter.Particles(i)=matter.Particles(i).PrepareParticle(neg_to_pos, pos_to_neg);
+                waitbar(i/length(matter.Particles),wb, [num2str(100*i/length(matter.Particles)) ' %'])
+            end;
+            close(wb);
+        end;
+        
+        function matter = PrepareMatterInRealUnits(matter, neg_to_pos, pos_to_neg)
+            wb = waitbar(0,'Preparation of matter...', 'Name', 'PrepareParticle');
+            for i=1:1:length(matter.Particles)
+                matter.Particles(i)=matter.Particles(i).PrepareParticleInRealUnits(neg_to_pos, pos_to_neg);
+                waitbar(i/length(matter.Particles),wb, [num2str(100*i/length(matter.Particles)) ' %'])
+            end;
+            close(wb);
+        end;
     end
     
 end

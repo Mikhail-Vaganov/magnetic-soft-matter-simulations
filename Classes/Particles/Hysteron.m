@@ -51,6 +51,10 @@ classdef Hysteron < iMagneticParticle
             end;
         end;
         
+        function h=GetMagnetization(hyst, value)
+            h = hyst.ApplyField(value);
+        end;
+        
         function H =  PositiveSaturationField(hysteron)
             H = (hysteron.Alpha + (hysteron.Alpha-hysteron.Beta)/2);
         end;
@@ -88,6 +92,10 @@ classdef Hysteron < iMagneticParticle
                  ];
             print('-djpeg',[folder file_name]);
         end;
+        
+        function p = PrepareParticle(p, neg_to_pos, pos_to_neg)
+            
+        end
     end
     
 end

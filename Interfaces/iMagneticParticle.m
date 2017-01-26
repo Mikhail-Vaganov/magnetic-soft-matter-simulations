@@ -4,6 +4,7 @@ classdef iMagneticParticle
     
     properties
         Magnetization;
+        MagnetizationInRealUnits
     end
     
     methods(Abstract) 
@@ -12,7 +13,9 @@ classdef iMagneticParticle
         SetDown(particle);
         PositiveSaturationField(particle);
         NegativeSaturationField(particle);
-        Draw(particle,folder)
+        Draw(particle,folder);
+        GetMagnetization(particle, field);
+        GetMagnetizationInRealUnits(particle, field);
     end
     
 end

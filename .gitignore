@@ -3,3 +3,4 @@
 *.asv
 output*
 /res*
+/temp*

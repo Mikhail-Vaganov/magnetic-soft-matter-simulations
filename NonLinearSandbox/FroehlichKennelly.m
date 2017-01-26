@@ -2,10 +2,10 @@ function [ M ] = FroehlichKennelly( H )
 %FROEHLICHKENELLY Summary of this function goes here
 %   Detailed explanation goes here
 
-global beta_hi
-global Msat_hi;
+global Beta_hi;
+global Msaturation_hi;
 
-M = Msat_hi*H/(abs(H)+1/beta_hi);
-
+%M = (Msaturation_hi*H)/(abs(H)+1/Beta_hi);
+M = (Msaturation_hi*H)/(abs(H)+Msaturation_hi/1000);
 end
 
