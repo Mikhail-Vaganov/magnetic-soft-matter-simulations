@@ -19,6 +19,7 @@ p.Draw('Folder for image representations');
 FORC folder contains simulation of the first order reversal curve experiment.
 
 Simulation of the FORC experiment consists of four steps:
+
 1. FORC processor initialization
 2. Preparation of the matter (processing of a hysteresis loop for acceleration of the simulation)
 3. FORCs measurement
