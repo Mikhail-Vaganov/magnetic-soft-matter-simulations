@@ -1,4 +1,4 @@
-classdef SWparticleRotative < iMagneticParticle
+classdef SwParticleRotativeElastic < iMagneticParticle
     % The SWparticle represents a particle, which magnetization process is
     % described by means of Stoner-Wohlfarth model.
     % This particle have one level more complexity than SWparticle: the
@@ -35,7 +35,6 @@ classdef SWparticleRotative < iMagneticParticle
         Ku = 4500000; % J/m3
         k=0; %Pa - compliance. Stable values are [0,1] beginning with 1.1 there is unstable Phi-s with awful hysteresis loops
         k2=0;
-        mu0 = 1.2566e-06; %Tm/A
         Ms = 1.2812e+06;% A/m  (Schrefl, 2012 - in the letter by Julia)
         
         % permendur, Fe65Co35
@@ -56,18 +55,17 @@ classdef SWparticleRotative < iMagneticParticle
         %radians
         %fi - the angle between the external field and the magnetic moment
         %of the particle
-        function sw = SWparticleRotative(psi, value)
+        function sw = SwParticleRotativeElastic(psi)
             if nargin>0
                 sw.AngleFA = psi;
             else
                 sw.AngleFA = 0;
-            end;
+            end;            
             
-            if nargin>1
-                sw.Magnetization = value;
-            else
-                sw.Magnetization = 1;
-            end;
+            sw.Magnetization = 1;
+            
+            sw.PositiveSaturationField =  1.5;
+            sw.NegativeSaturationField = -1.5;
             
             sw.LastAppliedField = 0;
             t = nthroot(tan(sw.AngleFA),3);
@@ -152,14 +150,6 @@ classdef SWparticleRotative < iMagneticParticle
             h = H*swp.mu0*swp.Ms/2/swp.Ku;
         end;
         
-        function H =  PositiveSaturationField(swp)
-            H = swp.SaturationField;
-        end;
-        
-        function H =  NegativeSaturationField(swp)
-            H = -swp.PositiveSaturationField;
-        end;
-        
         function Draw(swp,fig, folder)
             hold on;
             t=0:0.01:2*pi;
@@ -181,15 +171,15 @@ classdef SWparticleRotative < iMagneticParticle
             swp.DrawRectangularHysteresis(fig,1,1);
             swp.DrawTitle(fig);
             swp.SaveImage(fig,folder);
-            hold off;            
+            hold off;
         end;
-                
+        
         function DrawInFig(p,fig,folder,options)
             t=0:0.01:2*pi;
             
             magnitude=p.PositiveSaturationField;
             
-            input = magnitude*cos(t);            
+            input = magnitude*cos(t);
             output=zeros(length(t),1);
             
             len=length(input);
@@ -199,11 +189,11 @@ classdef SWparticleRotative < iMagneticParticle
             end;
             %input=input*2*swp.Ku/swp.mu0/swp.Ms;
             %output = output*swp.Ms;
-                        
+            
             figure(fig);
             plot(input,output,options);
             p.DrawTitle(fig);
-                       
+            
             p.SaveImage(fig,folder);
         end;
         
@@ -285,7 +275,7 @@ classdef SWparticleRotative < iMagneticParticle
         function p = PrepareParticle(p, neg_to_pos, pos_to_neg)
             len1=length(pos_to_neg);
             len2=length(neg_to_pos);
-           
+            
             for i=1:1:len1;
                 p = p.ApplyField(pos_to_neg(i));
                 p.M_H_up(pos_to_neg(i)) = p.Magnetization;

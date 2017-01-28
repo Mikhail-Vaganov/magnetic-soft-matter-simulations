@@ -4,6 +4,8 @@ The project contains simulations of a soft matter with magnetic particles.
 Magnetically *hard* particles simulated by the Stoner-Wohlfarth model.
 Magnetically *soft* particles obey the Froehlich-Kennelly law.
 
+The code is written in Matlab.
+
 ### Stoner-Wolfarth model simulation
 
 The Stoner-Wolfarth model of the magnetic hysteresis is implemented in SwParticle class. 
@@ -47,7 +49,7 @@ This conception is implemented by Hysteresis class.
 The constructor requires the switching field values, at which magnetization of the particle jumps to the upper and bottom branches correspondingly.
 
 ```matlab
-h=Hysteron(4, 0);
+h = Hysteron(4, 0);
 h.Draw('Folder for image representations');
 ```
 

@@ -1,7 +1,14 @@
-classdef SwParticle < iMagneticParticle
-    % The SwParticle represents a particle, which magnetization process is
+classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
+    % SwParticle represents a particle, which magnetization process is
     % described by means of Stoner-Wohlfarth model
-    % Magnetization property equals to Ms*cos ? - magnetization in the direction of the applied field
+    % Magnetization property equals to the magnetization in the direction of the applied field
+    % 
+    % The field applied to this particle in method ApplyField should be mesured in relative
+    % units.
+    % 
+    % If you want to apply the field and mesure the magnetization in real units,
+    % such as A/m, use the corresponding methods of
+    % iRealMagnetizableParticle interface
     
     properties
         %The angle between an external field and anisotropy axis
@@ -102,15 +109,6 @@ classdef SwParticle < iMagneticParticle
         
         function p = GetMagnetization(particle, field)
             p = particle.ApplyField(field);
-        end;
-        
-        function p = GetMagnetizationInRealUnits(particle, field)
-            p = particle.ApplyField(particle.TransformFieldInRelativeUnits(field));
-            p.MagnetizationInRealUnits = p.MagnetizationInRealUnits();
-        end
-        
-        function h = TransformFieldInRelativeUnits(swp, H)
-            h = H*swp.mu0*swp.Ms/2/swp.Ku;
         end;
         
         function H = FieldInRealUnits(swp, field)

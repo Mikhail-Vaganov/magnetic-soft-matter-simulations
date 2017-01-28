@@ -4,14 +4,13 @@ clear all;
 
 resultsFolder = 'C:\Users\Michael\Dropbox\MATLAB\FORC_1\Results';
 
-N = 101;
-k = linspace(0,10,N);
+N = 181;
+phi = linspace(0,pi,N);
 
 fig = figure(2);
 for i=1:1:N
-    sw = SWparticleRotative(10*pi/180,1);
-    sw.k = k(i);
-    sw.k2 = k(i);
+    sw = SwParticleRotativeElastic(phi(i));
+    sw.k = 1;
     sw.Draw(fig, resultsFolder);
     %M(i) = getframe(fig);
     clf;

@@ -1,14 +1,16 @@
-classdef SWandPnonInteract  < iMagneticParticle
-    % !!! Particle is not consistent with current FORC processors !!!
-    % Complex particle consisting of Stoner-Wohlfarth particle and
-    % paramagnetic particle described by the second model.
+classdef HybridParticle  < iMagneticParticle
+    % HYBRIDPARTICLE is an abstract representation of a hybrid structure
     %
-    % If interaction is strong, then the soft particle get magnetizatization 
-    % the same sign as hard particle has - it means, that the field of the 
-    % hard particle in the place where soft particle is located is greater, 
-    % than the external field!    
+    % The abstract structure represents a structural element of a hybrid magnetic elastomer.
     %
-    % This is the third model of SW+soft structural particle
+    % Magnetically hard phase can be represented by any object
+    % implementing iMagneticParticle and iRealMagnetizableParticle model and
+    % the paramagnetic phase are described by the Froehlish-Kennelly law.
+    %
+    % If interaction is strong, then the soft particle get
+    % magnetizatization at the same sign as hard particle has - it means, that the field of the
+    % hard particle in the place where soft particles are located is greater,
+    % than the external field!
     %
     
     properties
@@ -34,10 +36,14 @@ classdef SWandPnonInteract  < iMagneticParticle
     end
     
     methods
-        function r = SWandPnonInteract(sw)
+        function r = HybridParticle(sw)
             if nargin>0
                 r.SWparticle = sw;
-            end;
+                r.PositiveSaturationField = sw.FieldInRealUnits(sw.PositiveSaturationField);
+                r.NegativeSaturationField = sw.FieldInRealUnits(sw.NegativeSaturationField);
+                r.Magnetization = r.SoftConcentration*r.Msaturation_hi + r.HardConcentration * sw.Ms;
+            end;            
+            
             r.M_H_up=containers.Map('KeyType','double','ValueType','double');
             r.M_H_dn=containers.Map('KeyType','double','ValueType','double');
         end;
@@ -59,7 +65,7 @@ classdef SWandPnonInteract  < iMagneticParticle
             global Beta_hi;
             Msaturation_hi=p.Msaturation_hi;
             Beta_hi=p.Beta_hi;
-            m=FroehlichKennelly(field);
+            m=froehlich_kennelly_magnetization(field);
         end;
         
         function H = GetFieldsOnParticles(p, field)
@@ -73,6 +79,8 @@ classdef SWandPnonInteract  < iMagneticParticle
             global Msaturation_hi;
             global Beta_hi;
             
+            global hardParticle;
+            
             Hext=field;
             g1 = p.Gamma1;
             g2 = p.Gamma2;
@@ -81,39 +89,27 @@ classdef SWandPnonInteract  < iMagneticParticle
             
             Msaturation_hi=p.Msaturation_hi;
             Beta_hi=p.Beta_hi;
-            
+            hardParticle = p.SWparticle;
             
             fun = @magnetic_fields;
             
             H0 = [0.9*field, 0.9*field];
             sw = p.SWparticle.ApplyField(p.SWparticle.FieldInRelativeUnits(H0(1)));
             hard_magnetization = sw.MagnetizationInRealUnits();
-            soft_magnetization =FroehlichKennelly(H0(2));
-
+            soft_magnetization = froehlich_kennelly_magnetization(H0(2));
+            
             H0(1) = field+g1*soft_magnetization;
             H0(2) = field+g2*hard_magnetization;
             
-           
+            OPTIONS = optimoptions('fsolve','Algorithm','levenberg-marquardt','Display','off');
             
-            OPTIONS = optimoptions('fsolve','Algorithm','levenberg-marquardt','Display','off'); 
-    
             [H, fval, ex_code] = fsolve(fun,H0,OPTIONS);
         end;
         
-        function r = ApplyField(p,field)
-           
-            p.SWparticle =p.SWparticle.ApplyField(p.SWparticle.FieldInRelativeUnits(field));
-            H_m =  p.SWparticle.MagnetizationInRealUnits();
-            %S_m = p.ParamagnetM(field);
-            %p.Magnetization =p.HardConcentration*H_m + p.SoftConcentration*S_m;
-            p.Magnetization = H_m;
-            r = p;
-        end;
-        
-        function p = GetMagnetization(p, field)
+        function p = ApplyField(p, field)
             if p.M_H_up.isKey(field) && p.M_H_dn.isKey(field)
                 if p.M_H_up(field)==p.M_H_dn(field)
-                    if field>0 
+                    if field>0
                         p.Branch=2;
                         p.Magnetization=p.M_H_up(field);
                     elseif field<0
@@ -122,12 +118,12 @@ classdef SWandPnonInteract  < iMagneticParticle
                     else
                         if p.Branch==2 || p.Branch==1
                             p.Magnetization=p.M_H_up(field);
-                        else 
+                        else
                             p.Magnetization=p.M_H_dn(field)
                         end;
                     end;
                 else
-                    if field>p.LastApplyedField || field<p.LastApplyedField 
+                    if field>p.LastApplyedField || field<p.LastApplyedField
                         if p.Branch==2 || p.Branch==1
                             p.Branch=1;
                             p.Magnetization=p.M_H_up(field);
@@ -148,21 +144,27 @@ classdef SWandPnonInteract  < iMagneticParticle
                 p.Branch=-1;
                 p.Magnetization=p.M_H_dn(field);
             else
-                error(['There is no magnetization for field = ' num2str(field)]);
+                p=p.ApplyFieldDirectly(field);
             end;
             
             p.LastApplyedField=field;
         end;
         
-        function H = PositiveSaturationField(p)
-            H=p.SWparticle.FieldInRealUnits(p.SaturationField);
+        function p = ApplyFieldDirectly(p, field)
+            H = p.GetFieldsOnParticles(field);
+            p.HonSw=H(1);
+            p.HonHi=H(2);
+            
+            p.LastSWField=H(1);
+            p.LastHiField=H(2);
+            
+            p.SWparticle =p.SWparticle.ApplyField(p.SWparticle.FieldInRelativeUnits(H(1)));
+            H_m =  p.SWparticle.MagnetizationInRealUnits;
+            S_m = p.ParamagnetM(H(2));
+            p.Magnetization =p.HardConcentration*H_m + p.SoftConcentration*S_m;
         end;
         
-        function H = NegativeSaturationField(p)
-            H=-p.SWparticle.FieldInRealUnits(p.SaturationField);
-        end;
-        
-        function Draw(p, fig, folder)
+        function Draw(p, folder)
             t=0:0.01:2*pi;
             magnitude=p.PositiveSaturationField;
             input = magnitude*cos(t);
@@ -178,28 +180,37 @@ classdef SWandPnonInteract  < iMagneticParticle
             end;
             %close(wb);
             
-            mkdir(folder);
+            folderForThisClass = [folder filesep 'HybridParticle'];
+            if ~exist(folderForThisClass, 'dir')
+                mkdir(folderForThisClass);
+            end;
             
-            figure(fig);
-            plot(input,output);
-            xlabel('H, A/m');
-            ylabel('m, A/m');
-            title(['Magnetization of SW+Soft particle. \Psi=', num2str(p.SWparticle.AngleFA/pi*180) char(176)]);
-            p.DrawAxes(fig,input, output);
+            plot(input/10^6,output/10^6);
+            xlabel('H, MA/m');
+            ylabel('m, MA/m');
+            %title(['Magnetization of MH+MS particles. \Psi=', num2str(p.SWparticle.AngleFA/pi*180) char(176)]);
+            p.DrawAxes(input/10^6, output/10^6);
             
-            Folder_HM = [folder 'H-M\' ];
-            mkdir(Folder_HM);
+            folder_HM = [folderForThisClass filesep 'H-M' ];
+            if ~exist(folder_HM, 'dir')
+                mkdir(folder_HM);
+            end;
+            
             file_name = ['SW+Soft(' num2str(p.SWparticle.AngleFA/pi*180) ')____H-M____' datestr(now,'HH_MM_SS.jpg')];
-            print('-djpeg',[Folder_HM file_name]);
+            print('-djpeg',[folder_HM filesep file_name]);
             
-           
-            Folder_Soft_Magnet = [folder 'SoftMagnetization\'];
-            mkdir(Folder_Soft_Magnet);
+            
+            folderSoftMagnet = [folderForThisClass filesep 'SoftMagnetization'];
+            if ~exist(folderSoftMagnet, 'dir')
+                mkdir(folderSoftMagnet);
+            end;
             %p.DrawSoftMagnetization(Folder_Soft_Magnet);
             
-            Folder_SW = [folder 'SW\'];
-            mkdir(Folder_SW);
-            %p.SWparticle.Draw(Folder_SW);            
+            folder_SW = [folderForThisClass filesep 'SwParticle'];
+            if ~exist(folder_SW, 'dir')
+                mkdir(folder_SW);
+            end;
+            %p.SWparticle.Draw(Folder_SW);
         end;
         
         function DrawFields(p,folder)
@@ -221,7 +232,6 @@ classdef SWandPnonInteract  < iMagneticParticle
             output1=zeros(len1,1);
             output2=zeros(len2,1);
             
-            p=p.SetUp();
             for i=1:1:len1;
                 p = p.ApplyField(input1(i));
                 output1(i) = p.Magnetization;
@@ -229,7 +239,6 @@ classdef SWandPnonInteract  < iMagneticParticle
                 outputHhi1(i) = p.HonHi;
             end;
             
-            p=p.SetDown();
             for i=1:1:len2;
                 p = p.ApplyField(input2(i));
                 output2(i) = p.Magnetization;
@@ -258,7 +267,7 @@ classdef SWandPnonInteract  < iMagneticParticle
             xlabel('H');
             ylabel('Hsw_1, Hhi_1');
             title(['Fields of SW+Soft particle (field goes down). Gamma1=', num2str(p.Gamma1) ', Gamma2=', num2str(p.Gamma2)]);
-                        
+            
             file_name = ['SW+Soft(' num2str(180*(p.SWparticle.AngleFA/pi)) ')____Fields(field goes down)____' datestr(now,'HH_MM_SS.jpg')];
             print('-djpeg',[Folder_Fields file_name]);
             
@@ -267,7 +276,7 @@ classdef SWandPnonInteract  < iMagneticParticle
             xlabel('H');
             ylabel('Hsw_2, Hhi_2');
             title(['Fields of SW+Soft particle (field goes up). Gamma1=', num2str(p.Gamma1) ', Gamma2=', num2str(p.Gamma2)]);
-                        
+            
             file_name = ['SW+Soft(' num2str(180*(p.SWparticle.AngleFA/pi)) ')____Fields(field goes up)____' datestr(now,'HH_MM_SS.jpg')];
             print('-djpeg',[Folder_Fields file_name]);
             
@@ -285,9 +294,9 @@ classdef SWandPnonInteract  < iMagneticParticle
             
         end;
         
-        function DrawSoftMagnetization(p, fig, folder)
+        function DrawSoftMagnetization(p, folder)
             t=0:0.01:2*pi;
-            magnitude=p.PositiveSaturationField()*6;
+            magnitude=p.PositiveSaturationField()*0.2;
             input = magnitude*cos(t);
             len=length(input);
             
@@ -300,14 +309,14 @@ classdef SWandPnonInteract  < iMagneticParticle
             plot(input,output);
             p.DrawAxes(fig,input, output);
             
-            title('Magnetization of the soft particle (by F-K)');
+            title('Magnetization of the MS particle');
             
             file_name = ['Soft Magnetization(' num2str(p.Beta_hi) ')' datestr(now,'HH_MM_SS.jpg')];
-            print('-djpeg',[folder file_name]);
+            print('-djpeg',[folder filesep file_name]);
             
         end;
         
-        function DrawAxes(p, fig, input, output)
+        function DrawAxes(p, input, output)
             max_magn =max(output);
             stepy = abs(max_magn/10);
             zero_yy= -max_magn-stepy:stepy:max_magn+stepy;
@@ -318,11 +327,12 @@ classdef SWandPnonInteract  < iMagneticParticle
             zero_xx= -max_field-stepx:stepx:max_field+stepx;
             zero_xy = zeros(length(zero_xx),1);
             
-            figure(fig);
             hold on;
             plot(zero_yx,zero_yy,'--k',zero_xx,zero_xy, '--k');
             ylim([min(zero_yy) max(zero_yy)]);
             xlim([min(zero_xx) max(zero_xx)]);
+            xlabel('H, MA/m');
+            ylabel('M, MA/m');
             grid on;
             pbaspect([1 0.5 1])
             hold off;
@@ -341,14 +351,14 @@ classdef SWandPnonInteract  < iMagneticParticle
         function p = PrepareParticle(p, neg_to_pos, pos_to_neg)
             len1=length(pos_to_neg);
             len2=length(neg_to_pos);
-           
+            
             for i=1:1:len1;
-                p = p.ApplyField(pos_to_neg(i));
+                p = p.ApplyFieldDirectly(pos_to_neg(i));
                 p.M_H_up(pos_to_neg(i)) = p.Magnetization;
             end;
             
             for i=1:1:len2;
-                p = p.ApplyField(neg_to_pos(i));
+                p = p.ApplyFieldDirectly(neg_to_pos(i));
                 p.M_H_dn(neg_to_pos(i)) = p.Magnetization;
             end;
         end

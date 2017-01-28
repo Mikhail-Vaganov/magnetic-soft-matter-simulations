@@ -34,7 +34,7 @@ classdef ManyParticlesMatter  <iMatter
             Matter=matter;
             Matter.Magnetization = 0;
             for i=1:1:length(matter.Particles)
-                 Matter.Particles(i)=Matter.Particles(i).GetMagnetization(field);
+                 Matter.Particles(i)=Matter.Particles(i).ApplyField(field);
                  Matter.Magnetization =1.0*Matter.Magnetization+ 1.0*Matter.Particles(i).Magnetization;
                  %waitbar(i/length(matter.Particles),wb, [num2str(100*i/length(matter.Particles)) ' %'])
             end;

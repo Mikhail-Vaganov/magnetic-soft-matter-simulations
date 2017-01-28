@@ -6,7 +6,7 @@ tic
 %--------------------------%
 folder = 'Results\';
 %--------------------------%
-n=100;% number of particles
+n=10;% number of particles
 nFORCS=50; % number of FORC curves
 
 %--------------------------%
@@ -51,23 +51,23 @@ mss = normrnd(msu,sigmaMss,n,1);
 %histogram(mss,30);
 %title('Distribution of the magnetization of saturation of soft particle');
 %--------------------------%
-p(n)=SWandP;
+p(n)=HybridParticle;
 
 for i=1:1:n
     %fig=figure(i);
     %sw = SWparticle(psi(i),1);
     %sw = SWparticleRotative(60*pi/180,1);
-    sw = SWparticleRotative(psi(i),1);
+    sw = SwParticleRotativeElastic(psi(i));
     sw.k = 1.9;
     %sw.Ms=ms(i);
     %sw.Ku=ks(i);
     %sw.DrawInFig(folder, fig, '.b');
-    softAndHard= SWandP(sw);
+    softAndHard= HybridParticle(sw);
     softAndHard.Msaturation_hi = 1.72e+06;
     softAndHard.Gamma1=0.2;
     softAndHard.Gamma2=1;
     %softAndHard.Draw(fig,folder);
-    softAndHard = SWandP(sw);
+    softAndHard = HybridParticle(sw);
     %softAndHard.DrawSoftMagnetization(figure(861), folder);
     p(i) = sw;
 end;
@@ -90,15 +90,15 @@ toc
 return;
 %-------------------------------------%
 
-p2(n)=SWparticle(0,1);
+p2(n)=SwParticle(0);
 
 for i=1:1:n
     %fig=figure(i);
-    sw = SWparticle(psi(i),1);
+    sw = SwParticle(psi(i));
     sw.Ms=ms(i);
     sw.Ku=ks(i);
     %sw.DrawInFig(folder, fig, '.b');
-    softAndHard= SWandP(sw);
+    softAndHard= HybridParticle(sw);
     softAndHard.Msaturation_hi = mss(i);
     softAndHard.Gamma1=0.2;
     softAndHard.Gamma2=1;
