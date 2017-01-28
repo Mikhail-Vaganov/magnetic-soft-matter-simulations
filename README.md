@@ -1,10 +1,10 @@
 #Magnetic soft matter simulations
 
 The project contains simulations of soft matter with magnetic particles.
-
-FORC folder contains simulation of the first order reversal curve experiment.
 Magnetically *hard* particles simulated by the Stoner-Wohlfarth model
 Magnetically *soft* particles obey the Froehlich-Kennelly law
+
+FORC folder contains simulation of the first order reversal curve experiment.
 
 If you decide to use parts of my code in your research, please, let me know via account on GitHub or via e-mail sent to mikhail.vaganov.sci@gmail.com
 
