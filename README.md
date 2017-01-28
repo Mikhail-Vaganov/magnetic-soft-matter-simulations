@@ -4,9 +4,9 @@ The project contains simulations of a soft matter with magnetic particles.
 Magnetically *hard* particles simulated by the Stoner-Wohlfarth model.
 Magnetically *soft* particles obey the Froehlich-Kennelly law.
 
-### Stoner-Wolfarth model
+### Stoner-Wolfarth model simulation
 
-The Stoner-Wolfarth model is implemented in SwParticle class. 
+The Stoner-Wolfarth model of the magnetic hysteresis is implemented in SwParticle class. 
 The constructor requires one argument: the angle between the applied field and the easy axis (uniaxial anisotropy) 
 
 ```matalb
