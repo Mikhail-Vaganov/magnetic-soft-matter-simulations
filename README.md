@@ -14,7 +14,7 @@ p = SwParticle(pi/3);
 p.Draw('Folder for image representations');
 ```
 
-### First order reversal curve (FORC)
+### First order reversal curve (FORC) simulation
 
 FORC folder contains simulation of the first order reversal curve experiment.
 
