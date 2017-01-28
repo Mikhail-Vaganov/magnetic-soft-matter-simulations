@@ -11,7 +11,7 @@ The code is written in Matlab.
 The Stoner-Wolfarth model of the magnetic hysteresis is implemented in SwParticle class. 
 The constructor requires one argument: the angle between the applied field and the easy axis (uniaxial anisotropy) 
 
-```matalb
+```matlab
 p = SwParticle(pi/3);
 p.Draw('Folder for image representations');
 ```
@@ -32,7 +32,7 @@ The FORC diagrams analysis is implemented by the FORC processors, for instance, 
 FORC analysis can be applied to a matter simulating object which implements iMatter interface. 
 For example, in order to simulate a single particle model use SingleParticleMatter class, whose constructor takes in turn an implementation of iMagneticParticle interface.
 
-```matalb
+```matlab
 p = SwParticle(pi/3);
 matter = SingleParticleMatter(p);
 forc = PikeFORC(4, -4, 4, matter, resultsFolder);
