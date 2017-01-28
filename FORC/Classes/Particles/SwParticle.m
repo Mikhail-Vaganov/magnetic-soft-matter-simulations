@@ -1,6 +1,7 @@
 classdef SwParticle < iMagneticParticle
-    %The SwParticle represents a particle, which magnetization process is
-    %described by means of Stoner-Wohlfarth model
+    % The SwParticle represents a particle, which magnetization process is
+    % described by means of Stoner-Wohlfarth model
+    % Magnetization property equals to Ms*cos ? - magnetization in the direction of the applied field
     
     properties
         %The angle between an external field and anisotropy axis
@@ -22,18 +23,14 @@ classdef SwParticle < iMagneticParticle
         %radians
         %phi - the angle between the external field and the magnetic moment
         %of the particle
-        function sw = SwParticle(psiRadians, value)
+        function sw = SwParticle(psiRadians)
             if nargin>0
                 sw.AngleFA = psiRadians;
             else
                 sw.AngleFA = 0;
             end;
             
-            if nargin>1
-                sw.Magnetization = value;
-            else
-                sw.Magnetization = 1;
-            end;
+            sw.Magnetization = 1;
             
             sw.LastAppliedField = 0;
             t= nthroot(tan(sw.AngleFA),3);

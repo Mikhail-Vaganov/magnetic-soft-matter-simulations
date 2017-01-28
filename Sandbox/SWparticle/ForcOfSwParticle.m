@@ -4,7 +4,7 @@ close all;
 
 resultsFolder = 'Results\';
 
-p=SwParticle(pi/3,1);
+p=SwParticle(pi/3);
 
 matter = SingleParticleMatter(p);
 forc = PikeFORC(4, -4, 4, matter, resultsFolder);
