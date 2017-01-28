@@ -3,7 +3,6 @@
 % Fe: Tc = 1044K
 % Co: Tc = 1388K
 % Ni: Tc = 628K
-%
 
 Tc = 628;
 T=Tc:1:(Tc+200);

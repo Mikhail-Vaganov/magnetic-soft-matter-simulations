@@ -2,9 +2,13 @@
 
 The project contains simulations of soft matter with magnetic particles.
 
+## Magnetically *hard* particles simulated by the Stoner-Wohlfarth model
+## Magnetically *soft* particles obey the Fr?hlich-Kennelly law
 
 If you decide to use parts of my code in your research, please, let me know via account on GitHub or via e-mail sent to mikhail.vaganov.sci@gmail.com
 
+Otherwise, just cite this [article](http://www.sciencedirect.com/science/article/pii/S0304885316319552):
+* Vaganov, Linke, Odenbach, Raikher JMMM 2015
 
 
 ##References

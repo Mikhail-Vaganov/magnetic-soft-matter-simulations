@@ -1,0 +1,1 @@
+This folder contains implementation of the core-shell magnetostatics problem

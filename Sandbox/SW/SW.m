@@ -6,14 +6,14 @@ close all;
 figure(1);
 hold on;
 sw = SWparticle(pi*60/180,1);
-sw.DrawInFig('res/',1, 'b.');
+sw.DrawInFig('Results/',1, 'b.');
 
 swRot=SWparticleRotative(pi*60/180,1);
-swRot.DrawInFig('res/',1,'r.');
+swRot.DrawInFig('Results/',1,'r.');
 
 swRot=SWparticleRotative(pi*60/180,1);
 swRot.k=swRot.k*2;
-swRot.DrawInFig('res/',1,'g.');
+swRot.DrawInFig('Results/',1,'g.');
 
 legend('ordinary SW','rotative SW 1','rotative SW 2','Location','northwest');
 hold off;
