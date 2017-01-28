@@ -40,6 +40,19 @@ forc = forc.CalculateFORCDistribution();
 forc.DrawResults();
 ```
 
+### Preisach hysteresis model simulation
+
+In the Preisach model of hysteresis magnetic particles represented by the abstracted elements called hysterons, which possess rectangular hysteresis loop.
+This conception is implemented by Hysteresis class. 
+The constructor requires the switching field values, at which magnetization of the particle jumps to the upper and bottom branches correspondingly.
+
+```matlab
+h=Hysteron(4, 0);
+h.Draw('Folder for image representations');
+```
+
+The model of hysteresis as sum of hysterons is presented in the corresponding Preisach folder
+
 ### Usage of this code
 
 I will be glad to collaborate with you on other magnetic sumulations.
@@ -47,10 +60,10 @@ I will be glad to collaborate with you on other magnetic sumulations.
 If you decide to use parts of my code in your research, please, let me know via account on GitHub or via e-mail sent to mikhail.vaganov.sci@gmail.com
 
 Or, just cite this [article](http://www.sciencedirect.com/science/article/pii/S0304885316319552):
-* Vaganov, Linke, Odenbach, Raikher JMMM 2015
+* Vaganov, Linke, Odenbach, Raikher, JMMM 2015
 
 
 ##References
 1. Pike, Roberts, Verosub, JAP 1999
-2. Winklhofer, Zimanyi JAP 2006
-3. Harrison, Feinberg GGGE 2008 
+2. Winklhofer, Zimanyi, JAP 2006
+3. Harrison, Feinberg, GGGE 2008 

@@ -14,22 +14,19 @@ classdef Hysteron < iMagneticParticle
     end
     
     methods
-        function obj = Hysteron(initialMagnetization,a,b)
-            if nargin~=3
-                error('Constructor of Hysteron class needs 3 arguments')
+        function obj = Hysteron(a,b)
+            
+            if nargin~=2
+                error('Constructor of Hysteron class needs 2 arguments')
             end
             
             if a<b
                 error('Alpha parameter should be greater or equal than beta');
             end;
             
-            if initialMagnetization~=1 && initialMagnetization~=-1
-                error('Magnetization must be 1 or -1')
-            end
-            
             obj.Alpha=a;
             obj.Beta=b;
-            obj.Magnetization=initialMagnetization;
+            obj.Magnetization=1;
             
             obj.PositiveSaturationField = (a + (a-b)/2);
         	obj.NegativeSaturationField = (b - (a-b)/2);

@@ -4,7 +4,7 @@ close all;
 
 resultsFolder = 'Results\';
 
-h=Hysteron(1, 4, 0);
+h=Hysteron(4, 0);
 
 matter = SingleParticleMatter(h);
 forc = PikeFORC(4, -4, 4, matter, resultsFolder);
