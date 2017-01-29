@@ -26,6 +26,8 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
         Ms = 1.2812e+06;% A/m
         
         InRealUnits = 0; % flag shows whether to use real units or relative units of measurements
+        
+        LastBranch = 1;
     end
     
     methods
@@ -69,10 +71,12 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
         
         function r = SetUp(swp)
             r = swp.ApplyField(swp.PositiveSaturationField);
+            r.LastBranch = 1;
         end;
         
         function r = SetDown(swp)
             r = swp.ApplyField(swp.NegativeSaturationField);
+            r.LastBranch = -1;
         end;
         
         function p = ApplyField(p,appliedField)
@@ -85,23 +89,19 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
                 relativeMagnetization = p.Magnetization;
             end;
             
-            if appliedField>p.SwField
-                p.Magnetization = p.CosSearch(relativeField,0);
-            elseif appliedField<-p.SwField
-                p.Magnetization = p.CosSearch(relativeField,pi);
+            if appliedField>=p.SwField
+                p.LastBranch = 1;
+                p.Magnetization = p.CosSearch(relativeField,1);
+            elseif appliedField<=-p.SwField
+                p.LastBranch = -1;
+                p.Magnetization = p.CosSearch(relativeField,-1);
             else
-                if p.LastAppliedField>p.SwField
-                    p.Magnetization = p.CosSearch(relativeField,0);
-                elseif p.LastAppliedField<-p.SwField
-                    p.Magnetization = p.CosSearch(relativeField,pi);
+                if p.LastBranch == 1
+                    p.Magnetization = p.CosSearch(relativeField,1);
                 else
-                    if relativeMagnetization>=relativeField
-                        p.Magnetization = p.CosSearch(relativeField,0);
-                    else
-                        p.Magnetization = p.CosSearch(relativeField,pi);
-                    end;
+                    p.Magnetization = p.CosSearch(relativeField,-1);
                 end;
-            end;
+             end;
             
             p.LastAppliedField = appliedField;
             
@@ -115,25 +115,49 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
             h = sqrt(1-t^2+t^4)/(1+t^2);
         end;
         
-        function c=CosSearch(swp,field, angle)
-            if angle==0
+        function c=CosSearch(swp,field, branch)
+            if branch==1
                 if swp.M_H_up.isKey(field)
                     c=swp.M_H_up(field);
                     return;
                 end;
-            elseif angle==pi
+            else
                 if swp.M_H_dn.isKey(field)
                     c=swp.M_H_dn(field);
                     return;
                 end;
             end;
             
-            energy = @(fi) 0.5*sin(swp.AngleFA-fi)^2-field*cos(fi);
-            c=cos(fminsearch(energy,angle,optimset('TolFun', 1e-8,'TolX',1e-8,'MaxIter',1000,'MaxFunEvals',1000)));
+            %energy = @(fi) 0.5*sin(swp.AngleFA-fi)^2-field*cos(fi);
             
-            if angle==0
+            if branch==1
+                if swp.AngleFA<pi/2
+                    x=0:0.001:pi;
+                else
+                    x=-pi:0.001:0;
+                end;
+            else
+                if swp.AngleFA<pi/2
+                    x=-pi:0.001:0;
+                else
+                    x=0:0.001:pi;
+                end;
+            end;
+            
+            e = 0.5*sin(swp.AngleFA-x).^2-field*cos(x);
+            [pks,locs] = findpeaks(-e,x);
+            
+            if length(locs)==0
+                c = branch;
+            else
+                c = cos(locs(1));
+            end
+            
+            %c=cos(fminsearch(energy,angle,optimset('TolFun', 1e-8,'TolX',1e-8,'MaxIter',1000,'MaxFunEvals',1000)));
+            
+            if branch==0
                 swp.M_H_up(field)=c;
-            elseif angle==pi
+            elseif branch==pi
                 swp.M_H_dn(field)=c;
             end;
         end;
@@ -161,7 +185,7 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
         function Draw(p, folder)
             
             hold on;
-            t=0:0.01:2*pi;
+            t=0:0.001:2*pi;
             
             magnitude=p.PositiveSaturationField;
             

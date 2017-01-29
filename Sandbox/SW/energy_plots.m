@@ -4,9 +4,11 @@ clc;
 
 
 psi=1.4716;
+psi = 127/180*pi;
 q=1;
 
-x=0:0.001:2*pi;
+x=0:0.001:1*pi;
+%x= -pi:0.001:0;
 e = 0.5*sin(psi-x).^2-0.5*q*cos(x);
 
 [pks,locs] = findpeaks(e,x);
