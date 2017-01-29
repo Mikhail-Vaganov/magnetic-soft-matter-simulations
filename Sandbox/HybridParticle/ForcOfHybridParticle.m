@@ -5,6 +5,7 @@ close all;
 resultsFolder = 'Results\';
 
 sw = SwParticle(pi/3);
+sw = sw.SetIsInRealUnitMeasurements(1);
 p = HybridParticle(sw);
 
 figure(1);

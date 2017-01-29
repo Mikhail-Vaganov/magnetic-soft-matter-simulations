@@ -1,6 +1,8 @@
 classdef SingleParticleMatter <iMatter
-    %SINGLEHYSTERONMATTER Summary of this class goes here
-    %   Detailed explanation goes here
+    %SINGLEHYSTERONMATTER Representation of a one particle model
+    %   Objects of this calss apply external field directrly to a particle
+    %   in method ApplyField without transformation between real and
+    %   relative units of the field.
     
     properties
         Particle;
@@ -17,7 +19,7 @@ classdef SingleParticleMatter <iMatter
             end;
             
             if(~isa(particle, 'iMagneticParticle'))
-                error('Need iMagneticParticle for initialization!');
+                error('Needs iMagneticParticle for initialization!');
             end;
             
             obj.Particle=particle;            
@@ -49,7 +51,7 @@ classdef SingleParticleMatter <iMatter
         end;
         
         function Matter = PrepareMatter(matter, neg_to_pos, pos_to_neg)
-            matter.Particle =  matter.Particle.PrepareParticle(neg_to_pos, pos_to_neg)
+            matter.Particle =  matter.Particle.PrepareParticle(neg_to_pos, pos_to_neg);
             Matter = matter;
         end;
     end

@@ -38,9 +38,14 @@ classdef HybridParticle  < iMagneticParticle
     methods
         function r = HybridParticle(sw)
             if nargin>0
+                
+                if (~isa(sw, 'iRealMagnetizableParticle'))
+                    error('The hard phase should implement iRealMagnetizableParticle interface');
+                end;
+            
                 r.SWparticle = sw;
-                r.PositiveSaturationField = sw.FieldInRealUnits(sw.PositiveSaturationField);
-                r.NegativeSaturationField = sw.FieldInRealUnits(sw.NegativeSaturationField);
+                r.PositiveSaturationField = sw.PositiveSaturationField;
+                r.NegativeSaturationField = sw.NegativeSaturationField;
                 r.Magnetization = r.SoftConcentration*r.Msaturation_hi + r.HardConcentration * sw.Ms;
             end;            
             
@@ -73,7 +78,6 @@ classdef HybridParticle  < iMagneticParticle
             global Hext
             global g1
             global g2
-            global psi
             global SWMagnetization;
             
             global Msaturation_hi;
@@ -84,7 +88,6 @@ classdef HybridParticle  < iMagneticParticle
             Hext=field;
             g1 = p.Gamma1;
             g2 = p.Gamma2;
-            psi = p.SWparticle.AngleFA;
             SWMagnetization = p.SWparticle.Magnetization;
             
             Msaturation_hi=p.Msaturation_hi;
@@ -94,8 +97,8 @@ classdef HybridParticle  < iMagneticParticle
             fun = @magnetic_fields;
             
             H0 = [0.9*field, 0.9*field];
-            sw = p.SWparticle.ApplyField(p.SWparticle.FieldInRelativeUnits(H0(1)));
-            hard_magnetization = sw.MagnetizationInRealUnits();
+            sw = p.SWparticle.ApplyField(H0(1));
+            hard_magnetization = sw.Magnetization;
             soft_magnetization = froehlich_kennelly_magnetization(H0(2));
             
             H0(1) = field+g1*soft_magnetization;
@@ -158,8 +161,8 @@ classdef HybridParticle  < iMagneticParticle
             p.LastSWField=H(1);
             p.LastHiField=H(2);
             
-            p.SWparticle =p.SWparticle.ApplyField(p.SWparticle.FieldInRelativeUnits(H(1)));
-            H_m =  p.SWparticle.MagnetizationInRealUnits;
+            p.SWparticle =p.SWparticle.ApplyField(H(1));
+            H_m =  p.SWparticle.Magnetization;
             S_m = p.ParamagnetM(H(2));
             p.Magnetization =p.HardConcentration*H_m + p.SoftConcentration*S_m;
         end;

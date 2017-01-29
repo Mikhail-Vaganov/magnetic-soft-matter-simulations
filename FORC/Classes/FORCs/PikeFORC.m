@@ -16,7 +16,7 @@ classdef PikeFORC
         Hrgrid; % 2D result of meshgrid(H,Hr)
         Hr; % 1D reversal field
         H; % 1D FORC field
-        N = 101; % number of FORCs
+        N = 21; % number of FORCs
         Hstep;
         minHc;
         maxHc;
@@ -32,7 +32,6 @@ classdef PikeFORC
         PgridHHr; % FORC distribution in (H,Hr) coordinates
         PgridHcHu; % FORC distribution in (Hc,Hu) coordinates
         SF=4; %smoothing factor
-        in_real_units = 0;
     end
     
     methods
@@ -175,12 +174,18 @@ classdef PikeFORC
             
             figure(15);
             set(gca,'FontSize',14);
-            if forc.in_real_units
+            if forc.maxHc>1e3 && forc.maxHc<1e6
                 contourf(forc.Hcgrid/1e3,forc.Hugrid/1e3,forc.PgridHcHu,n_countour);
                 grid on;
                 title('FORC diagram');
                 xlabel(texlabel('H_c, (kA/m)'));
                 ylabel(texlabel('H_u, (kA/m)'));
+            elseif forc.maxHc>1e6
+                contourf(forc.Hcgrid/1e6,forc.Hugrid/1e6,forc.PgridHcHu,n_countour);
+                grid on;
+                title('FORC diagram');
+                xlabel(texlabel('H_c, (MA/m)'));
+                ylabel(texlabel('H_u, (MA/m)'));
             else
                 contourf(forc.Hcgrid,forc.Hugrid,forc.PgridHcHu,n_countour);
                 grid on;
@@ -195,9 +200,12 @@ classdef PikeFORC
             colormap(ColourMaps.GetBlueToWhiteToRed()/255);
             %colormap(ColourMaps.GetBlueToGreenToYellowToRed()/255);
             
-            if forc.in_real_units
+            if forc.maxHc>1e3 && forc.maxHc<1e6
                 xlim([forc.minHc/1e3, forc.maxHc/1e3]);
                 ylim([forc.minHu/1e3, forc.maxHu/1e3]);
+            elseif forc.maxHc>1e6
+                xlim([forc.minHc/1e6, forc.maxHc/1e6]);
+                ylim([forc.minHu/1e6, forc.maxHu/1e6]);
             else
                 xlim([forc.minHc, forc.maxHc]);
                 ylim([forc.minHu, forc.maxHu]);

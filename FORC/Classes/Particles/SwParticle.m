@@ -1,14 +1,19 @@
-classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
+classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparableParticle
     % SwParticle represents a particle, which magnetization process is
     % described by means of Stoner-Wohlfarth model
     % Magnetization property equals to the magnetization in the direction of the applied field
-    % 
+    %
     % The field applied to this particle in method ApplyField should be mesured in relative
     % units.
-    % 
-    % If you want to apply the field and mesure the magnetization in real units,
-    % such as A/m, use the corresponding methods of
-    % iRealMagnetizableParticle interface
+    %
+    % This particle can operate in both real units and relative units modes.
+    % If you want to apply the field and measure the magnetization in real units,
+    % such as A/m, set up InRealUnits flag .
+    %
+    % Later it should be redesigned to SW model acting in relative units and
+    % to representation of a particle acting in terms of real physical units
+    % e.g. SwModel and SwParticle, where the later will contain SwModel
+    % inside as a logical core.
     
     properties
         %The angle between an external field and anisotropy axis
@@ -20,8 +25,7 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
         Ku = 4500000; % J/m3
         Ms = 1.2812e+06;% A/m
         
-        M_H_up; %the upper branch of the M-H loop
-        M_H_dn; %the lower branch of the M-H loop
+        InRealUnits = 0; % flag shows whether to use real units or relative units of measurements
     end
     
     methods
@@ -37,16 +41,30 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
                 sw.AngleFA = 0;
             end;
             
-            sw.Magnetization = 1;
+            sw = sw.SetIsInRealUnitMeasurements(0);
+        end;
+        
+        function p=SetIsInRealUnitMeasurements(p,inRealUnits)
             
-            sw.LastAppliedField = 0;
-            t= nthroot(tan(sw.AngleFA),3);
-            sw.SwField = sqrt(1-t^2+t^4)/(1+t^2);
-            sw.M_H_up=containers.Map('KeyType','double','ValueType','double');
-            sw.M_H_dn=containers.Map('KeyType','double','ValueType','double');
+            p.InRealUnits=inRealUnits;
+            p.M_H_up=containers.Map('KeyType','double','ValueType','double');
+            p.M_H_dn=containers.Map('KeyType','double','ValueType','double');
             
-            sw.PositiveSaturationField =  1.5;
-            sw.NegativeSaturationField = -1.5;
+            if inRealUnits==0
+                p.Magnetization = 1;
+                p.MagnetizationSaturation =1;
+                p.LastAppliedField = 0;
+                p.SwField = p.RelativeSwitchingField();
+                p.PositiveSaturationField =  1.5;
+                p.NegativeSaturationField = -1.5;
+            else
+                p.Magnetization = p.Ms;
+                p.MagnetizationSaturation =p.Ms;
+                p.LastAppliedField = 0;
+                p.SwField =p.FieldInRealUnits(p.RelativeSwitchingField);
+                p.PositiveSaturationField =  p.FieldInRealUnits(1.5);
+                p.NegativeSaturationField = p.FieldInRealUnits(-1.5);
+            end;
         end;
         
         function r = SetUp(swp)
@@ -57,37 +75,54 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
             r = swp.ApplyField(swp.NegativeSaturationField);
         end;
         
-        function r = ApplyField(swp,field)
-            if field>swp.SwField
-                swp.Magnetization = swp.CosSearch(field,0);
-            elseif field<-swp.SwField
-                swp.Magnetization = swp.CosSearch(field,pi);
+        function p = ApplyField(p,appliedField)
+            
+            if p.InRealUnits==1
+                relativeField = p.FieldInRelativeUnits(appliedField);
+                relativeMagnetization = p.MagnetizationInRelativeUnits;
             else
-                if swp.LastAppliedField>swp.SwField
-                    swp.Magnetization = swp.CosSearch(field,0);
-                elseif swp.LastAppliedField<-swp.SwField
-                    swp.Magnetization = swp.CosSearch(field,pi);
+                relativeField = appliedField;
+                relativeMagnetization = p.Magnetization;
+            end;
+            
+            if appliedField>p.SwField
+                p.Magnetization = p.CosSearch(relativeField,0);
+            elseif appliedField<-p.SwField
+                p.Magnetization = p.CosSearch(relativeField,pi);
+            else
+                if p.LastAppliedField>p.SwField
+                    p.Magnetization = p.CosSearch(relativeField,0);
+                elseif p.LastAppliedField<-p.SwField
+                    p.Magnetization = p.CosSearch(relativeField,pi);
                 else
-                    if swp.Magnetization>=swp.LastAppliedField
-                        swp.Magnetization = swp.CosSearch(field,0);
+                    if relativeMagnetization>=relativeField
+                        p.Magnetization = p.CosSearch(relativeField,0);
                     else
-                        swp.Magnetization = swp.CosSearch(field,pi);
+                        p.Magnetization = p.CosSearch(relativeField,pi);
                     end;
                 end;
-            end;         
-                
-            swp.LastAppliedField = field;
-            r=swp;       
+            end;
+            
+            p.LastAppliedField = appliedField;
+            
+            if p.InRealUnits==1
+                p.Magnetization = p.MagnetizationInRealUnits();
+            end;
+        end;
+        
+        function h = RelativeSwitchingField(p)
+            t= nthroot(tan(p.AngleFA),3);
+            h = sqrt(1-t^2+t^4)/(1+t^2);
         end;
         
         function c=CosSearch(swp,field, angle)
-             if angle==0
+            if angle==0
                 if swp.M_H_up.isKey(field)
                     c=swp.M_H_up(field);
                     return;
                 end;
             elseif angle==pi
-                 if swp.M_H_dn.isKey(field)
+                if swp.M_H_dn.isKey(field)
                     c=swp.M_H_dn(field);
                     return;
                 end;
@@ -95,7 +130,7 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
             
             energy = @(fi) 0.5*sin(swp.AngleFA-fi)^2-field*cos(fi);
             c=cos(fminsearch(energy,angle,optimset('TolFun', 1e-8,'TolX',1e-8,'MaxIter',1000,'MaxFunEvals',1000)));
-        
+            
             if angle==0
                 swp.M_H_up(field)=c;
             elseif angle==pi
@@ -104,6 +139,10 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
         end;
         
         function M = MagnetizationInRealUnits(swp)
+            M = swp.Magnetization*swp.Ms;
+        end;
+        
+        function M = MagnetizationInRelativeUnits(swp)
             M = swp.Magnetization*swp.Ms;
         end;
         
@@ -117,28 +156,34 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
         
         function h = FieldInRelativeUnits(swp, H)
             h = H*swp.mu0*swp.Ms/2/swp.Ku;
-        end;        
+        end;
         
-        function Draw(swp, folder)
+        function Draw(p, folder)
             
             hold on;
             t=0:0.01:2*pi;
             
-            magnitude=swp.PositiveSaturationField;
-                        
-            input = magnitude*cos(t);            
+            magnitude=p.PositiveSaturationField;
+            
+            input = magnitude*cos(t);
             output=zeros(length(t),1);
             
             for i=1:1:length(t);
-                swp = swp.ApplyField(input(i));
-                output(i) = swp.Magnetization;
+                p = p.ApplyField(input(i));
+                output(i) = p.Magnetization;
             end;
             
             plot(input,output, 'LineWidth',2);
-            swp.DrawAxes(input, output);
-            swp.DrawRectangularHysteresis(1,1);
-            swp.DrawTitle();
-            swp.SaveImage(folder);
+            p.DrawAxes(input, output);
+            
+            if(p.InRealUnits==1)
+                p.DrawRectangularHysteresis(p.FieldInRealUnits(1),p.Ms);
+            else
+                p.DrawRectangularHysteresis(1,1);
+            end;
+            
+            p.DrawTitle();
+            p.SaveImage(folder);
             hold off;
         end;
         
@@ -147,12 +192,19 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
         end;
         
         function DrawAxes(p, input, output)
-            max_magn = 1;
+            
+            if p.InRealUnits ==1
+                max_magn = p.Ms;
+                max_field = p.FieldInRealUnits(2);
+            else
+                max_magn = 1;
+                max_field=2;
+            end;
+            
             stepy = abs(max_magn/10);
             zero_yy= -max_magn-stepy:stepy:max_magn+stepy;
             zero_yx = zeros(length(zero_yy),1);
             
-            max_field=2;
             stepx = abs(max_field/10);
             zero_xx= -max_field-stepx:stepx:max_field+stepx;
             zero_xy = zeros(length(zero_xx),1);
@@ -186,42 +238,24 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle
             end;
             
             file_name = [...
-                 'SW(' ...
-                 num2str(180*swp.AngleFA/pi) ...
-                 ')____' ...
-                 datestr(now,'HH_MM_SS') ...
-                 ];
+                'SW(' ...
+                num2str(180*swp.AngleFA/pi) ...
+                ')____' ...
+                datestr(now,'HH_MM_SS') ...
+                ];
             print('-djpeg',[sw_folder filesep file_name '.jpg']);
             print('-dpdf',[sw_folder filesep file_name '.pdf']);
         end
         
-        function DrawInFig(swp,folder, fig, options)
-            t=0:0.01:2*pi;
-            
-            magnitude=swp.PositiveSaturationField;
-                        
-            input = -magnitude*cos(t);
-            
-            output=zeros(length(t),1);
-            for i=1:1:length(t);
-                swp = swp.ApplyField(input(i));
-                output(i) = swp.MagnetizationInRealUnits();
-            end;
-            
-            input=swp.FieldInRealUnits(input);
-            switchingField = round(swp.FieldInRealUnits(swp.SwField),2);
-           
-            figure(fig);
-            plot(input,output,options);
-            swp.DrawTitle(fig);
-            swp.SaveImage(fig, folder);
-            
+        function DrawInFig(p,folder,fig)
+            figure(fig)
+            p.Draw(folder);
         end;
         
         function p = PrepareParticle(p, neg_to_pos, pos_to_neg)
             len1=length(pos_to_neg);
             len2=length(neg_to_pos);
-           
+            
             for i=1:1:len1;
                 p = p.ApplyField(pos_to_neg(i));
                 p.M_H_up(pos_to_neg(i)) = p.Magnetization;
