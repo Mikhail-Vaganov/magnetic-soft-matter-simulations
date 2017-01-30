@@ -5,7 +5,7 @@ clc;
 
 psi=1.4716;
 %psi = 127/180*pi;
-%psi=10;
+psi = 0/180*pi;
 q=1;
 
 x=0:0.001:2*pi;
@@ -19,10 +19,11 @@ t=0:0.01:2*pi;
 h=2*cos(t);
 m=0;
 H=0;
+k=0;
 len=1;
 for i=1:1:length(h);
-    %e = @(x) -0.5 * cos(psi - x - f * q(i) * sin(x))^ 2 - q(i) * cos(x) + 0.5 * f * q(i)^ 2 * sin(x)^2;
-    e = 0.5*sin(psi-x).^2-h(i)*cos(x);
+    e = 0.5 * sin(psi - x - k * h(i) * sin(x)).^ 2 - h(i) * cos(x) + 0.5 * k * (h(i)* sin(x)).^2;
+    %e = 0.5*sin(psi-x).^2-h(i)*cos(x);
     [pks,locs] = findpeaks(-e,x);
     for j=1:1:length(locs);        
         m(len)= cos(locs(j));

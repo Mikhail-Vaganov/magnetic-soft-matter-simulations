@@ -4,6 +4,7 @@ classdef iRealMagnetizableParticle
     
     properties
         MagnetizationSaturation;
+        LastBranch = 1;
     end
     
     methods

@@ -84,6 +84,7 @@ classdef HybridParticle  < iMagneticParticle
             global Beta_hi;
             
             global hardParticle;
+            global lastBranch;
             
             Hext=field;
             g1 = p.Gamma1;
@@ -93,6 +94,7 @@ classdef HybridParticle  < iMagneticParticle
             Msaturation_hi=p.Msaturation_hi;
             Beta_hi=p.Beta_hi;
             hardParticle = p.SWparticle;
+            lastBranch = p.SWparticle.LastBranch;
             
             fun = @magnetic_fields;
             

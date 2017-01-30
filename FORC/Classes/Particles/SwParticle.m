@@ -27,7 +27,6 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
         
         InRealUnits = 0; % flag shows whether to use real units or relative units of measurements
         
-        LastBranch = 1;
     end
     
     methods
