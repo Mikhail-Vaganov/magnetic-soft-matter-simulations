@@ -9,7 +9,7 @@ classdef SwParticleRotativeElastic < SwParticle
     %
     % Since the output magnetization of the SW particle is represented by
     % the cosine of the angle between anystropy axis and the external
-    % field, sometimes it is important to transform magnetization and field 
+    % field, sometimes it is important to transform magnetization and field
     % into the ultimate values of the magnetization.
     %
     % This can be made by multiplying the external field h to
@@ -21,6 +21,8 @@ classdef SwParticleRotativeElastic < SwParticle
     properties
         k=0; %Pa - compliance. Stable values are [0,1] beginning with 1.1 there is unstable Phi-s with awful hysteresis loops
         k2=0;
+        LastPhi;
+        hstep = 0.01;
     end
     
     methods
@@ -29,36 +31,58 @@ classdef SwParticleRotativeElastic < SwParticle
         %radians
         %k - elastic module for rotational movement of the particle
         function sw = SwParticleRotativeElastic(psi, elasticModule)
+            if nargin < 1
+                error('SwParticleRotativeElastic requires the angle between anysotroy axis and the applied field positive direction');
+            end;
             sw = sw@SwParticle(psi);
-            sw.k = elasticModule;
-        end;        
-        
-        function c=CosSearch(swp,value, angle)
-            if angle==0
-                if swp.M_H_up.isKey(value)
-                    c = swp.M_H_up(value);
-                    return;
-                end;
-            elseif angle==pi
-                if swp.M_H_dn.isKey(value)
-                    c = swp.M_H_dn(value);
-                    return;
-                end;
-            end;
+            sw.LastPhi = psi;
             
-            %energy = @(fi) 0.5*sin(swp.AngleFA-fi-swp.k*value*sin(fi))^2-value*cos(fi)+(swp.k/2)*(value*sin(fi))^2;
-            if angle==0
-                energy = @(fi) 0.5*sin(swp.AngleFA-fi-swp.k*value*sin(fi))^2-value*cos(fi)+(swp.k/2)*(value*sin(fi))^2;
+            if nargin>1
+                sw.k = elasticModule;
             else
-                energy = @(fi) 0.5*sin(swp.AngleFA-fi-swp.k2*value*sin(fi))^2-value*cos(fi)+(swp.k2/2)*(value*sin(fi))^2;
+                sw.k = 0;
             end;
-            phi = fminsearch(energy,angle,optimset('TolFun', 1e-8,'TolX',1e-8,'MaxIter',1000,'MaxFunEvals',1000));
-            c = cos(phi);
+        end;
+        
+        function p = ApplyField(p, appliedField)
+            hstep = p.hstep;
+            if p.InRealUnits==1
+                hstep = p.FieldInRealUnits(hstep);
+            end;
             
-            if angle==0
-                swp.M_H_up(value) = c;
-            elseif angle==pi
-                swp.M_H_dn(value) = c;
+            if appliedField>p.LastAppliedField
+                h = p.LastAppliedField:hstep:appliedField;
+            else
+                h = p.LastAppliedField:-hstep:appliedField;
+            end;
+            
+            if h(length(h))~=appliedField
+                 h(length(h)+1)=appliedField;
+            end;
+            
+            for i=1:1:length(h)
+                p = p.ApplyFieldByStep(h(i));
+            end;
+        end;
+        
+        function p = ApplyFieldByStep(p,appliedField)
+            if p.InRealUnits==1
+                relativeField = p.FieldInRelativeUnits(appliedField);
+                relativeMagnetization = p.MagnetizationInRelativeUnits;
+            else
+                relativeField = appliedField;
+                relativeMagnetization = p.Magnetization;
+            end;
+            
+            
+            energy = @(phi) 0.5*sin(p.AngleFA-phi-p.k*relativeField*sin(phi))^2-relativeField*cos(phi)+(p.k/2)*(relativeField*sin(phi))^2;
+            phi  = fminsearch(energy, p.LastPhi);         
+            p.Magnetization = cos(phi);
+            p.LastPhi = mod(abs(phi),2*pi)*sign(phi);
+            p.LastAppliedField = appliedField;
+            
+            if p.InRealUnits==1
+                p.Magnetization = p.MagnetizationInRealUnits();
             end;
         end;
         
@@ -99,6 +123,7 @@ classdef SwParticleRotativeElastic < SwParticle
         end
         
         function p = PrepareParticle(p, neg_to_pos, pos_to_neg)
+            return;
             len1=length(pos_to_neg);
             len2=length(neg_to_pos);
             

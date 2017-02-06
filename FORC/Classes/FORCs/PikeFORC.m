@@ -16,7 +16,7 @@ classdef PikeFORC
         Hrgrid; % 2D result of meshgrid(H,Hr)
         Hr; % 1D reversal field
         H; % 1D FORC field
-        N = 41; % number of FORCs
+        N = 101; % number of FORCs
         Hstep;
         minHc;
         maxHc;
@@ -104,8 +104,8 @@ classdef PikeFORC
         
         function forc = CalculateFORCDistribution(e)
             wb = waitbar(0,'CalculateFORCDistribution...', 'Name', 'CalculateFORCDistribution');
-            for i=1:1:length(e.Hr);
-                for j=1:1:length(e.H);
+            for i=1:1:length(e.Hr)
+                for j=1:1:length(e.H)
                     if(e.H(j)>=e.Hr(i))
                         e.PgridHHr(i,j)=e.GetLocalFORCDistribution(i,j);
                     end;
@@ -115,8 +115,8 @@ classdef PikeFORC
             close(wb);
             
             wb = waitbar(0,'Coordinates transformation...', 'Name', 'Coordinates transformation');
-            for i=1:1:length(e.Hr);
-                for j=1:1:length(e.H);
+            for i=1:1:length(e.Hr)
+                for j=1:1:length(e.H)
                     e.Hugrid(i,j)=round((e.H(j) + e.Hr(i))/2 * 1e4)/1e4;
                     e.Hcgrid(i,j)=round((e.H(j) - e.Hr(i))/2 * 1e4)/1e4;
                     e.PgridHcHu(i,j) = e.PgridHHr(i,j);
@@ -357,7 +357,7 @@ classdef PikeFORC
         
         function DrawResults(e)
             %e.DrawMagnetizatinFORC();
-            %e.DrawFORCs();
+            e.DrawFORCs();
             %e.DrawFORCDiagramHHr();
             e.DrawFORCDiagramHcHu();
             %e.DrawCoercivityRidge(0);

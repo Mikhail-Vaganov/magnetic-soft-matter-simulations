@@ -56,8 +56,8 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
                 p.MagnetizationSaturation =1;
                 p.LastAppliedField = 0;
                 p.SwField = p.RelativeSwitchingField();
-                p.PositiveSaturationField =  1.5;
-                p.NegativeSaturationField = -1.5;
+                p.PositiveSaturationField =  4.5;
+                p.NegativeSaturationField = -4.5;
             else
                 p.Magnetization = p.Ms;
                 p.MagnetizationSaturation =p.Ms;
@@ -184,14 +184,17 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
         function Draw(p, folder)
             
             hold on;
-            t=0:0.001:2*pi;
             
-            magnitude=p.PositiveSaturationField;
+            hmax=p.PositiveSaturationField;
+            hstep = 0.01;
+            if p.InRealUnits==1
+                hstep = p.FieldInRealUnits(hstep);
+            end;            
             
-            input = magnitude*cos(t);
-            output=zeros(length(t),1);
+            input = [0:hstep:hmax hmax-hstep:-hstep:-hmax -hmax+hstep:hstep:hmax];
+            output=zeros(length(input),1);
             
-            for i=1:1:length(t);
+            for i=1:1:length(input);
                 p = p.ApplyField(input(i));
                 output(i) = p.Magnetization;
             end;
@@ -289,6 +292,16 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
                 p.M_H_dn(neg_to_pos(i)) = p.Magnetization;
             end;
         end
+        
+        function DrawAstroid()
+            teta = -pi:0.001:pi;
+            t= nthroot(tan(teta),3);
+            h = sqrt(1-t.^2+t.^4)/(1+t.^2);
+            h_perp = sin(teta).*h;
+            h_par = cos(teta).*h;
+            
+            sum_of_h = nthroot(h_perp,3).^2 + nthroot(h_par,3).^2;
+        end;
     end
     
 end

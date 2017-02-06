@@ -2,17 +2,17 @@ clc;
 close all;
 clear all;
 
-resultsFolder = 'Results\';
+resultsFolder = 'e:\Results\';
 
 N = 181;
-phi = linspace(0,pi,N);
+psi = linspace(0,pi,N);
 
 fig = figure(2);
 for i=1:1:N
-    sw = SwParticle(phi(i));
+    sw = SwParticle(psi(i));
     sw.Draw(resultsFolder);
     M(i) = getframe(fig);
     clf;
 end;
 
-movie2avi(M, [resultsFolder filesep 'SwParticle_Loops.avi'], 'compression', 'None', 'fps', 2,'quality',100 );
+movie2avi(M, [resultsFolder filesep 'SwParticle_Loops.avi'], 'compression', 'None', 'fps', round(length(psi)/30),'quality',100 );
