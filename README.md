@@ -1,4 +1,4 @@
-#Magnetic soft matter simulations
+# Magnetic soft matter simulations
 
 The project contains simulations of a soft matter with magnetic particles.
 Magnetically *hard* particles simulated by the Stoner-Wohlfarth model.
