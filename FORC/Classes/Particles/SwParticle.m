@@ -56,15 +56,15 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
                 p.MagnetizationSaturation =1;
                 p.LastAppliedField = 0;
                 p.SwField = p.RelativeSwitchingField();
-                p.PositiveSaturationField =  4.5;
-                p.NegativeSaturationField = -4.5;
+                p.PositiveSaturationField =  1.5;
+                p.NegativeSaturationField = -1.5;
             else
                 p.Magnetization = p.Ms;
                 p.MagnetizationSaturation =p.Ms;
                 p.LastAppliedField = 0;
                 p.SwField =p.FieldInRealUnits(p.RelativeSwitchingField);
-                p.PositiveSaturationField =  p.FieldInRealUnits(1.5);
-                p.NegativeSaturationField = p.FieldInRealUnits(-1.5);
+                p.PositiveSaturationField =  p.FieldInRealUnits(1);
+                p.NegativeSaturationField = p.FieldInRealUnits(-1);
             end;
         end;
         

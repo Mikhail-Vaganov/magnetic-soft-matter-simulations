@@ -16,11 +16,11 @@ classdef HybridParticle  < iMagneticParticle
     properties
         SWparticle;
         Gamma1=0.2;
-        Gamma2=1;
+        Gamma2=0.8;
         SaturationField=2;
         HonHi;
         HonSw;
-        Beta_hi=0.000001;
+        Beta_hi=1;
         Msaturation_hi=1720000; % A/m for Fe (Coey, Magnetizm and Magnetic Mterials)
         
         SoftConcentration=0.5;
@@ -151,10 +151,15 @@ classdef HybridParticle  < iMagneticParticle
             else
                 p=p.ApplyFieldDirectly(field);
             end;
-            
+            p=p.ApplyFieldDirectly(field);
             p.LastApplyedField=field;
         end;
         
+        function p = ApplyField1(p, field)
+            p=p.ApplyFieldDirectly(field);
+            p.LastApplyedField=field;
+        end;
+            
         function p = ApplyFieldDirectly(p, field)
             H = p.GetFieldsOnParticles(field);
             p.HonSw=H(1);
@@ -170,31 +175,72 @@ classdef HybridParticle  < iMagneticParticle
         end;
         
         function Draw(p, folder)
-            t=0:0.01:2*pi;
-            magnitude=p.PositiveSaturationField;
-            input = magnitude*cos(t);
-            len=length(input);
+            hold on;
+            hmax=p.PositiveSaturationField;
+            hstep = 0.01;
+            if p.SWparticle.InRealUnits==1
+                hstep = p.SWparticle.FieldInRealUnits(hstep);
+            end;            
             
-            output=zeros(len,1);
+            input = [0:hstep:hmax hmax-hstep:-hstep:-hmax -hmax+hstep:hstep:hmax];
+            output=zeros(length(input),1);
             
             %wb = waitbar(0,'Draw Soft-Hard particle...', 'Name', 'Magnetizationg');
-            for i=1:1:len;
+            for i=1:1:length(input)
                 p = p.ApplyField(input(i));
                 output(i) = p.Magnetization;
                 %waitbar(i/len,wb, [num2str(100*i/len) ' %'])
             end;
             %close(wb);
             
+            if max(input)<1000
+                plot(input,output);
+                p.DrawAxes(input, output);
+                xlabel(['H, A/' char(1084)]);
+                ylabel(['M, A/' char(1084)]);
+            elseif max(input)<10^6
+                plot(input/10^3,output/10^3);
+                p.DrawAxes(input/10^3, output/10^3);
+                xlabel(['H, ' char(1082) 'A/' char(1084)]);
+                ylabel(['M, ' char(1082) 'A/' char(1084)]);
+            else
+                plot(input/10^6,output/10^6);
+                p.DrawAxes(input/10^6, output/10^6);
+                xlabel(['H, MA/' char(1084)]);
+                ylabel(['M, MA/' char(1084)]);
+            end;
+            
+            %title(['Magnetization of MH+MS particles. \Psi=', num2str(p.SWparticle.AngleFA/pi*180) char(176)]);
+            set(gca,'fontsize',8);
+            
+            p.SaveImage(folder);            
+        end;
+        
+        function DrawAxes(p, input, output)
+            max_magn =max(output);
+            stepy = abs(max_magn/10);
+            zero_yy= -max_magn-stepy:stepy:max_magn+stepy;
+            zero_yx = zeros(length(zero_yy),1);
+            
+            max_field=max(input);
+            stepx = abs(max_field/10);
+            zero_xx= -max_field-stepx:stepx:max_field+stepx;
+            zero_xy = zeros(length(zero_xx),1);
+            
+            hold on;
+            plot(zero_yx,zero_yy,'--k',zero_xx,zero_xy, '--k');
+            ylim([min(zero_yy) max(zero_yy)]);
+            xlim([min(zero_xx) max(zero_xx)]);
+            grid on;
+            pbaspect([1 0.5 1])
+            hold off;
+        end
+        
+        function SaveImage(p, folder)
             folderForThisClass = [folder filesep 'HybridParticle'];
             if ~exist(folderForThisClass, 'dir')
                 mkdir(folderForThisClass);
             end;
-            
-            plot(input/10^6,output/10^6);
-            xlabel('H, MA/m');
-            ylabel('m, MA/m');
-            %title(['Magnetization of MH+MS particles. \Psi=', num2str(p.SWparticle.AngleFA/pi*180) char(176)]);
-            p.DrawAxes(input/10^6, output/10^6);
             
             folder_HM = [folderForThisClass filesep 'H-M' ];
             if ~exist(folder_HM, 'dir')
@@ -217,7 +263,7 @@ classdef HybridParticle  < iMagneticParticle
             end;
             %p.SWparticle.Draw(Folder_SW);
         end;
-        
+         
         function DrawFields(p,folder)
             t1=0:0.01:pi;
             t2=pi:0.01:2*pi;
@@ -320,28 +366,6 @@ classdef HybridParticle  < iMagneticParticle
             print('-djpeg',[folder filesep file_name]);
             
         end;
-        
-        function DrawAxes(p, input, output)
-            max_magn =max(output);
-            stepy = abs(max_magn/10);
-            zero_yy= -max_magn-stepy:stepy:max_magn+stepy;
-            zero_yx = zeros(length(zero_yy),1);
-            
-            max_field=max(input);
-            stepx = abs(max_field/10);
-            zero_xx= -max_field-stepx:stepx:max_field+stepx;
-            zero_xy = zeros(length(zero_xx),1);
-            
-            hold on;
-            plot(zero_yx,zero_yy,'--k',zero_xx,zero_xy, '--k');
-            ylim([min(zero_yy) max(zero_yy)]);
-            xlim([min(zero_xx) max(zero_xx)]);
-            xlabel('H, MA/m');
-            ylabel('M, MA/m');
-            grid on;
-            pbaspect([1 0.5 1])
-            hold off;
-        end
         
         function p=PrepareItself(p)
             t1=0:0.01:pi;

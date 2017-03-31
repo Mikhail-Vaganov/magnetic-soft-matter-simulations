@@ -12,7 +12,7 @@ hstep=0.01;
 h = [0:hstep:hmax hmax-hstep:-hstep:-hmax -hmax+hstep:hstep:hmax];
 
 k=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,1000,10000,100000];
-k=1;
+%k=0.8;
 fig = figure(2);
 for i=1:1:length(k)
     v = VideoWriter([resultsFolder filesep 'SWparticleRotative' filesep 'SwAndSwrComparison' filesep 'Loops_Comparison_k=' strrep(num2str(k(i)),'.','_')],'MPEG-4');

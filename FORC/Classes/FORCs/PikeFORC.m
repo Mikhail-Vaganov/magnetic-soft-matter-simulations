@@ -102,6 +102,15 @@ classdef PikeFORC
             forc = e;
         end;
         
+        function e = ParallelMagnetization(e)
+            
+            if ~isa(e.Matter, 'iParallelMagnetizable')
+                error('The matter cannot be magnetized in a parallel way!');
+            end;
+            
+            e.Mgrid = e.Matter.GetParallelMagnetizationGrid(e.Hr, e.H);
+        end;
+        
         function forc = CalculateFORCDistribution(e)
             wb = waitbar(0,'CalculateFORCDistribution...', 'Name', 'CalculateFORCDistribution');
             for i=1:1:length(e.Hr)
@@ -174,12 +183,15 @@ classdef PikeFORC
             
             figure(15);
             set(gca,'FontSize',14);
-            if forc.maxHc>1e3 && forc.maxHc<1e6
+            if forc.maxHc>1e3 %&& forc.maxHc<1e6
                 contourf(forc.Hcgrid/1e3,forc.Hugrid/1e3,forc.PgridHcHu,n_countour);
                 grid on;
-                title('FORC diagram');
+                %title('FORC diagram');
+                %xlabel(texlabel(['H_c, (' char(1082) 'A/' char(1084) ')']));
+                %ylabel(texlabel(['H_u, (' char(1082) 'A/' char(1084) ')']));
                 xlabel(texlabel('H_c, (kA/m)'));
                 ylabel(texlabel('H_u, (kA/m)'));
+                set(gca,'fontsize',10);
             elseif forc.maxHc>1e6
                 contourf(forc.Hcgrid/1e6,forc.Hugrid/1e6,forc.PgridHcHu,n_countour);
                 grid on;
@@ -200,7 +212,7 @@ classdef PikeFORC
             colormap(ColourMaps.GetBlueToWhiteToRed()/255);
             %colormap(ColourMaps.GetBlueToGreenToYellowToRed()/255);
             
-            if forc.maxHc>1e3 && forc.maxHc<1e6
+            if forc.maxHc>1e3 %&& forc.maxHc<1e6
                 xlim([forc.minHc/1e3, forc.maxHc/1e3]);
                 ylim([forc.minHu/1e3, forc.maxHu/1e3]);
             elseif forc.maxHc>1e6
@@ -278,7 +290,9 @@ classdef PikeFORC
             xlabel('H');
             ylabel('M');
             
-            mkdir([e.FolderForResults_common filesep 'FORCs']);
+            if ~exist([e.FolderForResults_common filesep 'FORCs'])
+                mkdir([e.FolderForResults_common filesep 'FORCs']);
+            end;
             print('-djpeg',[e.FolderForResults_common filesep 'FORCs' filesep datestr(now,'HH_MM_SS')]);
             print('-djpeg',[e.FolderForResults_with_time filesep 'FORCs ' datestr(now,'HH_MM_SS')]);
         end;
@@ -357,7 +371,7 @@ classdef PikeFORC
         
         function DrawResults(e)
             %e.DrawMagnetizatinFORC();
-            e.DrawFORCs();
+            %e.DrawFORCs();
             %e.DrawFORCDiagramHHr();
             e.DrawFORCDiagramHcHu();
             %e.DrawCoercivityRidge(0);
@@ -370,6 +384,7 @@ classdef PikeFORC
             e.Matter = e.Matter.PrepareMatter(negToPos, posToNeg);
             forc = e;
         end;
+            
     end
     
 end

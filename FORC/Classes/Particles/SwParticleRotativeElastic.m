@@ -39,6 +39,7 @@ classdef SwParticleRotativeElastic < SwParticle
             
             if nargin>1
                 sw.k = elasticModule;
+                sw.k2 = elasticModule;
             else
                 sw.k = 0;
             end;
@@ -74,8 +75,12 @@ classdef SwParticleRotativeElastic < SwParticle
                 relativeMagnetization = p.Magnetization;
             end;
             
-            
-            energy = @(phi) 0.5*sin(p.AngleFA-phi-p.k*relativeField*sin(phi))^2-relativeField*cos(phi)+(p.k/2)*(relativeField*sin(phi))^2;
+            %relativeField=relativeField*0.5/0.2;
+            if appliedField>=0
+                energy = @(phi) 0.5*sin(p.AngleFA-phi-p.k*relativeField*sin(phi))^2-relativeField*cos(phi)+(p.k/2)*(relativeField*sin(phi))^2;
+            else
+                energy = @(phi) 0.5*sin(p.AngleFA-phi-p.k2*relativeField*sin(phi))^2-relativeField*cos(phi)+(p.k2/2)*(relativeField*sin(phi))^2;
+            end;
             phi  = fminsearch(energy, p.LastPhi);         
             p.Magnetization = cos(phi);
             p.LastPhi = mod(abs(phi),2*pi)*sign(phi);
@@ -84,6 +89,20 @@ classdef SwParticleRotativeElastic < SwParticle
             if p.InRealUnits==1
                 p.Magnetization = p.MagnetizationInRealUnits();
             end;
+        end;
+        
+        function r = SetUp(swp)
+            r = swp.ApplyField(0);
+            r. LastPhi = swp.AngleFA;
+            r = swp.ApplyField(swp.PositiveSaturationField);
+            r.LastBranch = 1;
+        end;
+        
+        function r = SetDown(swp)
+            r = swp.ApplyField(0);
+            r. LastPhi = swp.AngleFA;
+            r = swp.ApplyField(swp.NegativeSaturationField);
+            r.LastBranch = -1;
         end;
         
         function DrawTitle(swp)

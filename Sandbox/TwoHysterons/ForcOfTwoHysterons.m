@@ -4,8 +4,8 @@ close all;
 
 resultsFolder = 'Results\';
 
-h1=Hysteron(4, 0);
-h2=Hysteron(0, -4);
+h1=Hysteron(4, -1);
+h2=Hysteron(1, -4);
 twoHysterons = TwoHysterons(h1,h2);
 
 matter = SingleParticleMatter(twoHysterons);

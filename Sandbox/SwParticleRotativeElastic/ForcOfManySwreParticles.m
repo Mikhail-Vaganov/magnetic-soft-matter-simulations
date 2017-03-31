@@ -5,16 +5,18 @@ close all;
 resultsFolder = 'e:\matlab\Results\';
 
 %% FORC
-N = 101;
-psi = linspace(0,20*pi/180,N);
+N = 5;
+psi = linspace(0,90*pi/180,N);
 
 for i=1:1:N    
-    p(i)=SwParticleRotativeElastic(psi(i),1);
+    p(i)=SwParticleRotativeElastic(psi(i),3);
 end;
 
-matter = ManyParticlesMatter(p);
-forc = PikeFORC(8, -8, 8, matter, resultsFolder);
+matter = ManyResetableSwreParticlesMatter(p, false);
+forc = PikeFORC(2, -2, 2, matter, resultsFolder);
 forc = forc.PrepareMatter();
-forc = forc.MagnetizationFORC();
+tic
+forc = forc.ParallelMagnetization();
+toc
 forc = forc.CalculateFORCDistribution();
 forc.DrawResults();

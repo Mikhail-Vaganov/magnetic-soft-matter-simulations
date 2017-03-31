@@ -1,14 +1,15 @@
-classdef ManyParticlesMatter  < iMatter & iParallelMagnetizable
+classdef ManyResetableSwreParticlesMatter  < iMatter & iParallelMagnetizable
     %MANYSWPARTICLESMATTER Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
         Particles
+        InRealUnits;
     end
     
     methods
         
-         function obj = ManyParticlesMatter(particles)
+         function obj = ManyResetableSwreParticlesMatter(particles, inRealUnits)
             if(nargin<1)
                 error('Need Particles for initialization!');
             end;
@@ -16,6 +17,7 @@ classdef ManyParticlesMatter  < iMatter & iParallelMagnetizable
             obj.Particles=particles;
             obj.NegativeSaturationField=1;
             obj.PositiveSaturationField=-1;
+            obj.InRealUnits = inRealUnits;
             
             for i=1:1:length(particles)
                 if(obj.NegativeSaturationField>particles(i).NegativeSaturationField())                    
@@ -50,6 +52,12 @@ classdef ManyParticlesMatter  < iMatter & iParallelMagnetizable
             parfor ppp = 1:length(particles)
                 Mgrid2 = NaN(length(reversalFieldValues), length(forcFieldValues));
                 for i=1:length(reversalFieldValues)
+                    Ku = particles(ppp).Ku;
+                    k2 = particles(ppp).k2;
+                    particles(ppp) = SwParticleRotativeElastic(particles(ppp).AngleFA, particles(ppp).k);
+                    particles(ppp).Ku = Ku;
+                    particles(ppp).k2 = k2;
+                    particles(ppp) = particles(ppp).SetIsInRealUnitMeasurements(matter.InRealUnits);
                     particles(ppp) = particles(ppp).SetUp();
                     particles(ppp) = particles(ppp).ApplyField(reversalFieldValues(i));
                     for j=1:length(forcFieldValues)
