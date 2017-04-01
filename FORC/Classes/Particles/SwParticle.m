@@ -1,17 +1,17 @@
 classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparableParticle
     % SwParticle represents a particle, which magnetization process is
-    % described by means of Stoner-Wohlfarth model
+    % described by means of the Stoner-Wohlfarth model
     % Magnetization property equals to the magnetization in the direction of the applied field
     %
-    % The field applied to this particle in method ApplyField should be mesured in relative
-    % units.
+    % The minimization of the energy function processed by findpeakes
+    % function under the energy with opposite sign
     %
     % This particle can operate in both real units and relative units modes.
     % If you want to apply the field and measure the magnetization in real units,
-    % such as A/m, set up InRealUnits flag .
+    % such as A/m, call SetIsInRealUnitMeasurements method .
     %
-    % Later it should be redesigned to SW model acting in relative units and
-    % to representation of a particle acting in terms of real physical units
+    % Later it should be redesigned to two classes: SW model acting in 
+    % relative units and a particle acting in terms of the real physical units
     % e.g. SwModel and SwParticle, where the later will contain SwModel
     % inside as a logical core.
     
@@ -27,6 +27,7 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
         
         InRealUnits = 0; % flag shows whether to use real units or relative units of measurements
         
+        CriticalAngle = 76.72*pi/180; % the angle at which the braches begin to intersect
     end
     
     methods
@@ -293,14 +294,13 @@ classdef SwParticle < iMagneticParticle & iRealMagnetizableParticle & iPreparabl
             end;
         end
         
-        function DrawAstroid()
-            teta = -pi:0.001:pi;
-            t= nthroot(tan(teta),3);
-            h = sqrt(1-t.^2+t.^4)/(1+t.^2);
-            h_perp = sin(teta).*h;
-            h_par = cos(teta).*h;
-            
-            sum_of_h = nthroot(h_perp,3).^2 + nthroot(h_par,3).^2;
+        function DrawAstroid(swp)
+            theta = -pi:0.001:pi;
+            x = cos(theta).^3;
+            y = sin(theta).^3;
+            plot(x,y);
+            grid on;
+            grid minor;
         end;
     end
     

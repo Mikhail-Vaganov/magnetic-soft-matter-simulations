@@ -1,6 +1,6 @@
-classdef SwParticleRotativeElastic < SwParticle
+classdef SwParticleAsymmetricElastic < SwParticle
     % The SWparticle represents a particle, which magnetization process is
-    % described by means of Stoner-Wohlfarth model.
+    % described by means of the Stoner-Wohlfarth model.
     % This particle have one level more complexity than SWparticle: the
     % rotative term. The elastic rotation is implemented into the
     % expression of energy.
@@ -30,7 +30,7 @@ classdef SwParticleRotativeElastic < SwParticle
         %psi - the angle between an external field and anistropy axis in
         %radians
         %k - elastic module for rotational movement of the particle
-        function sw = SwParticleRotativeElastic(psi, elasticModule)
+        function sw = SwParticleAsymmetricElastic(psi, rigidElasticModule,softElasticModule)
             if nargin < 1
                 error('SwParticleRotativeElastic requires the angle between anysotroy axis and the applied field positive direction');
             end;

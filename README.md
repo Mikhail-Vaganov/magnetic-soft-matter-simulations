@@ -4,7 +4,7 @@ The project contains simulations of a soft matter with magnetic particles.
 Magnetically *hard* particles simulated by the Stoner-Wohlfarth model.
 Magnetically *soft* particles obey the Froehlich-Kennelly law.
 
-The code is written in Matlab.
+The code is written for usage with Octave or Matlab software.
 
 ### Stoner-Wolfarth model simulation
 
