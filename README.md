@@ -65,7 +65,7 @@ Or, just cite this [article](http://www.sciencedirect.com/science/article/pii/S0
 * Vaganov, Linke, Odenbach, Raikher, JMMM 2015
 
 
-##References
+## References
 1. Pike, Roberts, Verosub, JAP 1999
 2. Winklhofer, Zimanyi, JAP 2006
 3. Harrison, Feinberg, GGGE 2008 
