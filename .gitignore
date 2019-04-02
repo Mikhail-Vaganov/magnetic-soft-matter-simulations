@@ -4,3 +4,5 @@
 output*
 /res*
 /temp*
+/Folder for image representations
+.DS_Store

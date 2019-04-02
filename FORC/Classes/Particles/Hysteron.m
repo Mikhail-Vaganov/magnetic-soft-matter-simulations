@@ -86,7 +86,7 @@ classdef Hysteron < iMagneticParticle
                 datestr(now,'HH_MM_SS') ...
                 ];
             print('-djpeg',[folderForThisClass filesep fileName]);
-            savefig([folderForThisClass filesep file_name '.fig']);
+            savefig([folderForThisClass filesep fileName '.fig']);
          end;
         
         function p = PrepareParticle(p, negToPos, posToNeg)
