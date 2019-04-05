@@ -31,7 +31,7 @@ title('F(\alpha,\beta)');
 xlabel('\alpha');
 ylabel('\beta');
 %--------------------------------
-m = output(h,t,F, alpha, beta);
+m = f_output(h,t,F, alpha, beta);
 figure(4);
 plot(t,m,'r');
 grid on;

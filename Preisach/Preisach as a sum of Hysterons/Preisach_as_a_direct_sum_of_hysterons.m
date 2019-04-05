@@ -33,13 +33,13 @@ step=2*ab_max/sqrt(2*n);
 [a__, b__, u] = random_ab(ab_max,step);
 alpha=a__(1,:);
 beta=b__(:,1);
-len=0;
+ind=0;
 
 for i=1:1:length(alpha)
     for j=1:1:length(beta)
         if(alpha(i)>=beta(j))
-            len=len+1;
-            hysts(len)= Hysteron(alpha(i),beta(j));
+            ind=ind+1;
+            hysts(ind)= Hysteron(alpha(i),beta(j));
         else
             u(j,i)=0;
         end;
@@ -49,13 +49,13 @@ end;
 
 m=zeros(length(t),1);
 for s=1:1:length(t)
-    len=0;
+    ind=0;
     for i=1:1:length(alpha)
         for j=1:1:length(beta)
             if(alpha(i)>=beta(j))
-                len=len+1;
-                hysts(len)=ApplyField(hysts(len),h(s));
-                m(s)=m(s)+u(j,i)*hysts(len).Magnetization;
+                ind=ind+1;
+                hysts(ind)=hysts(ind).ApplyField(h(s));
+                m(s)=m(s)+u(j,i)*hysts(ind).Magnetization;
             end;
         end;
     end;
